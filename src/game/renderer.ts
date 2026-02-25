@@ -3046,6 +3046,8 @@ function renderNPCs(ctx: CanvasRenderingContext2D, state: GameState): void {
       drawMirekDoctor(ctx, npc, state.time);
     } else if (npc.id === 'policjant') {
       drawPolicjant(ctx, npc, state.time);
+    } else if (npc.id === 'rafal') {
+      drawWujekRafal(ctx, npc, state.time);
     } else {
       drawCharacter(ctx, npc, npc.color, npc.hairColor, npc.hairLong, state.time);
       if (npc.id === 'listonosz') {
@@ -3554,6 +3556,103 @@ function drawPolicjant(ctx: CanvasRenderingContext2D, npc: NPC, time: number): v
   ctx.fillRect(cx - 14, topY + 44, 28, 3);
   ctx.fillStyle = '#FFD700';
   ctx.fillRect(cx - 3, topY + 44, 6, 3);
+}
+
+// ---- WUJEK RAFAŁ — traveler from Vietnam, green shirt, backpack, tanned ----
+function drawWujekRafal(ctx: CanvasRenderingContext2D, npc: NPC, time: number): void {
+  // Use generic character as base with green travel shirt
+  drawCharacter(ctx, npc, '#2E7D32', '#5D4037', false, time);
+
+  const cx = npc.x + npc.w / 2;
+  const topY = npc.y;
+  const bob = Math.sin(time * 2.5) * 1;
+
+  // Tan skin overlay on face (slightly darker — Vietnam sun)
+  ctx.fillStyle = 'rgba(180,130,80,0.15)';
+  ctx.beginPath();
+  ctx.arc(cx, topY + 14, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Backpack (big, orange, on his back)
+  const bpX = cx - npc.dir * 16;
+  ctx.fillStyle = '#FF7043';
+  ctx.beginPath();
+  ctx.moveTo(bpX - 8, topY + 14 + bob);
+  ctx.quadraticCurveTo(bpX - 10, topY + 30 + bob, bpX - 8, topY + 50 + bob);
+  ctx.lineTo(bpX + 8, topY + 50 + bob);
+  ctx.quadraticCurveTo(bpX + 10, topY + 30 + bob, bpX + 8, topY + 14 + bob);
+  ctx.closePath();
+  ctx.fill();
+  // Backpack straps
+  ctx.strokeStyle = '#E65100';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(bpX - 4, topY + 14 + bob);
+  ctx.lineTo(cx - 6, topY + 20 + bob);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bpX + 4, topY + 14 + bob);
+  ctx.lineTo(cx + 6, topY + 20 + bob);
+  ctx.stroke();
+  // Backpack pocket
+  ctx.fillStyle = '#E65100';
+  ctx.fillRect(bpX - 5, topY + 36 + bob, 10, 8);
+  // Backpack flag (Vietnam)
+  ctx.fillStyle = '#DA251D';
+  ctx.fillRect(bpX - 5, topY + 14 + bob, 10, 6);
+  ctx.fillStyle = '#FFCD00';
+  ctx.beginPath();
+  ctx.moveTo(bpX, topY + 15 + bob);
+  ctx.lineTo(bpX - 2, topY + 19 + bob);
+  ctx.lineTo(bpX + 2, topY + 19 + bob);
+  ctx.closePath();
+  ctx.fill();
+  ctx.lineWidth = 1;
+
+  // Stubble/beard shadow
+  ctx.fillStyle = 'rgba(80,50,30,0.15)';
+  ctx.beginPath();
+  ctx.arc(cx, topY + 20, 6, 0, Math.PI);
+  ctx.fill();
+
+  // Sunglasses (pushed up on forehead)
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(cx - 5, topY + 6 + bob, 4, 0, Math.PI * 2);
+  ctx.arc(cx + 5, topY + 6 + bob, 4, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.lineWidth = 1;
+
+  // Taxi parked behind him (if on street)
+  if (npc.x < -100) {
+    const tx = npc.x - 50;
+    const ty = topY + 55;
+    // Taxi body
+    ctx.fillStyle = '#FDD835';
+    ctx.fillRect(tx, ty, 50, 18);
+    // Taxi roof
+    ctx.fillStyle = '#FBC02D';
+    ctx.fillRect(tx + 10, ty - 8, 24, 10);
+    // Windows
+    ctx.fillStyle = '#B3E5FC';
+    ctx.fillRect(tx + 12, ty - 6, 8, 7);
+    ctx.fillRect(tx + 24, ty - 6, 8, 7);
+    // Wheels
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.arc(tx + 10, ty + 18, 4, 0, Math.PI * 2);
+    ctx.arc(tx + 40, ty + 18, 4, 0, Math.PI * 2);
+    ctx.fill();
+    // TAXI sign
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(tx + 18, ty - 12, 14, 5);
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 4px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('TAXI', tx + 25, ty - 8);
+    ctx.textAlign = 'left';
+  }
 }
 
 // ---- KUBA (player) — dirty blond boy, 4-5yo, black Adidas shirt with red stripes ----

@@ -167,7 +167,9 @@ export type ItemType =
   // Hygiene items
   | 'toothbrush' | 'soap' | 'towel' | 'comb' | 'pajama' | 'rubber_duck' | 'shampoo'
   // Baby / pregnancy items
-  | 'baby_toy' | 'baby_bottle' | 'baby_blanket';
+  | 'baby_toy' | 'baby_bottle' | 'baby_blanket'
+  // Wujek Rafał quest items
+  | 'pierogi' | 'ptasie_mleczko' | 'backpack';
 
 export interface CollectibleItem {
   id: string;

@@ -235,9 +235,22 @@ export const COLORS = {
   babyBottle: '#B3E5FC',
   babyBlanket: '#CE93D8',
 
+  // Wujek Rafał items
+  pierogi: '#F5F0DC',
+  ptasieMleczko: '#6D4C41',
+  backpack: '#FF7043',
+
+  // Wujek Rafał character
+  rafalShirt: '#2E7D32',     // green travel shirt
+  rafalPants: '#5D4037',     // brown cargo pants
+  rafalHair: '#5D4037',      // dark brown
+  rafalSkin: '#F0C090',
+  rafalTan: '#E0B080',       // slightly tanned from Vietnam
+
   // Cars
   alfaBlack: '#1A1A1A',
   tiguanGray: '#9E9E9E',
+  taxiYellow: '#FDD835',
 
   // Costume colors
   hatPirate: '#333333',
@@ -300,6 +313,10 @@ export const ITEM_EMOJIS: Record<string, string> = {
   baby_toy: '🧸',
   baby_bottle: '🍼',
   baby_blanket: '🧶',
+  // Wujek Rafał
+  pierogi: '🥟',
+  ptasie_mleczko: '🍫',
+  backpack: '🎒',
 };
 
 // Combo thresholds

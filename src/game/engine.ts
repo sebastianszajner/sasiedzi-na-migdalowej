@@ -826,6 +826,7 @@ function showQuestNPCs(state: GameState, questId: string): void {
   if (questId === 'quest_franek') showNpc(state, 'franek');
   if (questId === 'quest_wash_hands' || questId === 'quest_hygiene_master') showNpc(state, 'mirek');
   if (questId === 'quest_baby') showNpc(state, 'mama');
+  if (questId === 'quest_rafal') { showNpc(state, 'mama'); showNpc(state, 'rafal'); }
 }
 
 // ---- NPC AI Behavior ----
@@ -1099,6 +1100,7 @@ function checkItemCollection(state: GameState): void {
       const isAnyPlush = item.type.startsWith('plush_');
       const isAnyBath = ['rubber_duck', 'shampoo'].includes(item.type);
       const isAnyBaby = ['baby_toy', 'baby_bottle', 'baby_blanket'].includes(item.type);
+      const isAnyRafal = ['pierogi', 'ptasie_mleczko'].includes(item.type);
 
       if (step.itemType) {
         if (step.itemType !== item.type) {
@@ -1107,7 +1109,8 @@ function checkItemCollection(state: GameState): void {
             (item.questId === 'quest_lego' && isAnyLego) ||
             (item.questId === 'quest_jurek' && isAnyPlush) ||
             (item.questId === 'quest_bath' && isAnyBath) ||
-            (item.questId === 'quest_baby' && isAnyBaby);
+            (item.questId === 'quest_baby' && isAnyBaby) ||
+            (item.questId === 'quest_rafal' && isAnyRafal);
           if (!questAllowsGroup) continue;
         }
       } else {
@@ -1117,7 +1120,8 @@ function checkItemCollection(state: GameState): void {
           (item.questId === 'quest_lego' && isAnyLego) ||
           (item.questId === 'quest_jurek' && isAnyPlush) ||
           (item.questId === 'quest_bath' && isAnyBath) ||
-          (item.questId === 'quest_baby' && isAnyBaby);
+          (item.questId === 'quest_baby' && isAnyBaby) ||
+          (item.questId === 'quest_rafal' && isAnyRafal);
         if (!isMatchingGroup) continue;
       }
 

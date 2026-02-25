@@ -217,6 +217,14 @@ export const MATH_PROBLEMS: MathProblem[] = [
     num1: 9, num2: 6, operation: '-', answer: 3,
     options: [2, 3, 4], hint: '9 miesięcy minus 6 = ?', difficulty: 1,
   },
+  // --- WUJEK RAFAŁ QUEST MATH ---
+  // [28] Pierogi + ptasie mleczko
+  {
+    visualIcon: '🥟',
+    question: 'Zrobiłeś 3 pierogi i 2 ptasie mleczko.\nIle jedzenia przygotowałeś?',
+    num1: 3, num2: 2, operation: '+', answer: 5,
+    options: [4, 5, 6], hint: '🥟🥟🥟 + 🍫🍫 = ?', difficulty: 1,
+  },
 ];
 
 // ---- Costumes (unlockable) ----
@@ -247,6 +255,8 @@ export const COSTUMES: CostumeItem[] = [
   { id: 'acc_stethoscope', name: 'Stetoskop', slot: 'accessory', emoji: '🩺', color: '#E53935', unlocked: false, unlockedBy: 'quest_wash_hands' },
   // Baby quest costume
   { id: 'hat_baby', name: 'Czapeczka starszego brata', slot: 'hat', emoji: '👶', color: '#F48FB1', unlocked: false, unlockedBy: 'quest_baby' },
+  // Wujek Rafał quest costume
+  { id: 'hat_vietnam', name: 'Nón lá (kapelusz wietnamski)', slot: 'hat', emoji: '🎋', color: '#C8AD8A', unlocked: false, unlockedBy: 'quest_rafal' },
 ];
 
 // ---- Achievements ----
@@ -458,6 +468,13 @@ export const LEVEL_1: LevelData = {
       dialogLines: [], questId: null, interactRadius: 90, emote: '👮',
       behavior: 'static', visible: false, animTimer: 0,
     },
+    // Wujek Rafał — wraca z Wietnamu, przyjeżdża taxi z lewej
+    {
+      id: 'rafal', name: 'Wujek Rafał', x: -500, y: 472, w: 52, h: 84, dir: 1,
+      color: '#2E7D32', hairColor: '#5D4037', hairLong: false,
+      dialogLines: [], questId: 'quest_rafal', interactRadius: 90, emote: '🎒',
+      behavior: 'static', visible: false, animTimer: 0,
+    },
   ],
 
   items: [
@@ -596,6 +613,13 @@ export const LEVEL_1: LevelData = {
     { id: 'baby2', type: 'baby_bottle', x: 500, y: 525, w: 26, h: 26, questId: 'quest_baby' },
     { id: 'baby3', type: 'baby_blanket', x: 750, y: 285, w: 26, h: 26, questId: 'quest_baby' },
     { id: 'baby4', type: 'baby_toy', x: 200, y: 285, w: 26, h: 26, questId: 'quest_baby' },
+
+    // ---- Quest: Wujek Rafał — pierogi + ptasie mleczko (kuchnia + salon) ----
+    { id: 'pierogi1', type: 'pierogi', x: 120, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
+    { id: 'pierogi2', type: 'pierogi', x: 200, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
+    { id: 'pierogi3', type: 'pierogi', x: 280, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
+    { id: 'ptasie1', type: 'ptasie_mleczko', x: 420, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
+    { id: 'ptasie2', type: 'ptasie_mleczko', x: 550, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
   ],
 
   quests: [
@@ -891,6 +915,17 @@ export const LEVEL_1: LevelData = {
       ],
       currentStep: 0, completed: false, active: false, reward: 3, costumeReward: 'hat_baby',
     },
+    // Quest: Wujek Rafał wraca z Wietnamu
+    {
+      id: 'quest_rafal', title: '🎒 Wujek Rafał wraca!', npcId: 'mama',
+      steps: [
+        { type: 'talk', description: 'Mama ma wiadomość o Wujku!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Przygotuj 3 pierogi i 2 ptasie mleczko', icon: '🥟', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'math', description: 'Ile jedzenia przygotowałeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[28], completed: false },
+        { type: 'deliver', description: 'Powitaj Wujka Rafała!', icon: '🎒', targetNpcId: 'rafal', completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 3, costumeReward: 'hat_vietnam',
+    },
   ],
 
   costumes: COSTUMES,
@@ -1106,6 +1141,37 @@ export function getNpcDialog(npcId: string, questId: string, stepIndex: number):
     if (stepIndex === 0) return ['Kuba, usiądź... 💕', 'Mama ma ważną wiadomość!', 'Będziesz miał braciszka lub siostrzyczkę! 👶', 'Pomożesz przygotować pokój?', 'Zbierz rzeczy dla maluszka! 🍼'];
     if (stepIndex === 2) return ['Wszystko gotowe dla maluszka! 👶💕', 'Będziesz najlepszym starszym bratem!', 'A teraz zagadka...'];
     return ['Zbierz rzeczy dla dzidzi! 🍼'];
+  }
+
+  // Quest: Wujek Rafał
+  if (npcId === 'mama' && questId === 'quest_rafal') {
+    if (stepIndex === 0) return [
+      'Kuba! Mam super wiadomość! 🎉',
+      'Wujek Rafał wraca z Wietnamu! ✈️',
+      'Był tam na długiej podróży z plecakiem 🎒',
+      'Zróbmy mu niespodziankę!',
+      'Przygotujmy pierogi i Ptasie Mleczko! 🥟🍫',
+      'Zbierz wszystko w kuchni i salonie!',
+    ];
+    if (stepIndex === 2) return [
+      'Super! Jedzenie gotowe! 🥟🍫',
+      'Wujek Rafał właśnie przyjechał taxi! 🚕',
+      'Ale zanim do niego pobiegniemy...',
+      'Rozwiąż zagadkę! 🧮',
+    ];
+    return ['Zbierz pierogi i Ptasie Mleczko! 🥟🍫'];
+  }
+  if (npcId === 'rafal' && questId === 'quest_rafal') {
+    if (stepIndex === 3) return [
+      'KUBUŚ!!! 🤗🤗🤗',
+      'Jak Ty urosłeś! Daj buziaka! 💕',
+      'Wiecie co? Wietnam jest PIĘKNY! 🌴',
+      'Przywiozłem Ci prawdziwy kapelusz wietnamski! 🎋',
+      'A co to? PIEROGI?! I PTASIE MLECZKO?! 🥟🍫',
+      'Najlepsza niespodzianka na świecie! 🎉',
+      'Kocham Was! Dziękuję Kuba! ❤️',
+    ];
+    return ['Hej Kuba! Fajnie że wróciłem! 🎒'];
   }
 
   return ['...'];

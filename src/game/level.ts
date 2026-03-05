@@ -502,7 +502,7 @@ export const LEVEL_1: LevelData = {
     // Fence is decorative — construction site is open
     // === PRZEDSZKOLE walls ===
     { x: 3496, y: 110, w: 8, h: 310 },             // Przedszkole left outer wall upper (110-420), gap 420-556 = entry
-    { x: 5096, y: 110, w: 8, h: 446 },             // Przedszkole right outer wall (solid)
+    { x: 5096, y: 110, w: 8, h: 310 },             // Przedszkole right outer wall upper (110-420), gap 420-556 = exit
     // Parter dividers (y:332, h:120 — gap at bottom 452-556 for passage)
     { x: 3696, y: 332, w: 8, h: 120 },             // Szatnia / Sala Motylki
     { x: 4046, y: 332, w: 8, h: 120 },             // Sala Motylki / Korytarz
@@ -517,7 +517,7 @@ export const LEVEL_1: LevelData = {
     { x: 4846, y: 110, w: 8, h: 120 },             // Łazienka P / Pokój Nauczycielski
     // === SZKOŁA walls ===
     { x: 5496, y: 110, w: 8, h: 310 },             // Szkoła left outer wall upper (110-420), gap 420-556 = entry
-    { x: 7796, y: 110, w: 8, h: 446 },             // Szkoła right outer wall (solid)
+    { x: 7796, y: 110, w: 8, h: 310 },             // Szkoła right outer wall upper (110-420), gap 420-556 = exit
     // Parter dividers (y:332, h:120)
     { x: 5796, y: 332, w: 8, h: 120 },             // Hol / Klasa 1A
     { x: 6146, y: 332, w: 8, h: 120 },             // Klasa 1A / Korytarz S
@@ -535,7 +535,7 @@ export const LEVEL_1: LevelData = {
     { x: 7596, y: 110, w: 8, h: 120 },             // Pokój Nauczycielski S / Łazienka S
     // === BIBLIOTEKA walls ===
     { x: -6404, y: 110, w: 8, h: 310 },             // Biblioteka left outer wall upper (gap 420-556 = entry)
-    { x: -5804, y: 110, w: 8, h: 446 },             // Biblioteka right outer wall (solid)
+    { x: -5804, y: 110, w: 8, h: 310 },             // Biblioteka right outer wall upper (110-420), gap 420-556 = exit
     // Parter dividers
     { x: -6254, y: 332, w: 8, h: 120 },             // Hol / Wypożyczalnia
     { x: -6104, y: 332, w: 8, h: 120 },             // Wypożyczalnia / Czytelnia
@@ -544,11 +544,11 @@ export const LEVEL_1: LevelData = {
     { x: -6254, y: 110, w: 8, h: 120 },             // Magazyn / Sala Multimedialna
     { x: -6104, y: 110, w: 8, h: 120 },             // Sala Multimedialna / Biuro
     { x: -5954, y: 110, w: 8, h: 120 },             // Biuro / Archiwum
-    // === OSIEDLE walls (3 simplified blocks) ===
-    { x: 9496, y: 210, w: 8, h: 346 },              // Osiedle block 1 left wall
-    { x: 9996, y: 210, w: 8, h: 346 },              // Block 1 right / Block 2 left
-    { x: 10496, y: 210, w: 8, h: 346 },             // Block 2 right / Block 3 left
-    { x: 10996, y: 210, w: 8, h: 346 },             // Block 3 right wall
+    // === OSIEDLE walls (3 simplified blocks) — gap 420-556 for ground-level entry ===
+    { x: 9496, y: 110, w: 8, h: 310 },              // Osiedle block 1 left wall (110-420), gap 420-556
+    { x: 9996, y: 110, w: 8, h: 310 },              // Block 1 right / Block 2 left (110-420), gap 420-556
+    { x: 10496, y: 110, w: 8, h: 310 },             // Block 2 right / Block 3 left (110-420), gap 420-556
+    { x: 10996, y: 110, w: 8, h: 310 },             // Block 3 right wall (110-420), gap 420-556
     // World boundaries
     { x: -7290, y: 0, w: 10, h: 556 },              // left world boundary (playground)
     { x: 10990, y: 0, w: 10, h: 556 },              // right world boundary (osiedle)

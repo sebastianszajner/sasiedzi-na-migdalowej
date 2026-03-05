@@ -2691,17 +2691,30 @@ function renderRooms(ctx: CanvasRenderingContext2D, state: GameState): void {
         ctx.fillStyle = room.floorColor;
         ctx.fillRect(room.x, room.y + room.h - floorH, room.w, floorH);
 
-        // Clip to room bounds, then draw image with overscan to hide any border
+        // Clip to room bounds, draw image with "cover" mode (preserve aspect ratio, crop overflow)
         ctx.save();
         ctx.beginPath();
         ctx.rect(room.x, room.y, room.w, room.h);
         ctx.clip();
-        const overscan = 6; // px — image extends beyond room edges, clipped away
-        ctx.drawImage(bgImg,
-          room.x - overscan,
-          room.y - overscan,
-          room.w + overscan * 2,
-          room.h + overscan * 2);
+        const imgW = bgImg.naturalWidth || bgImg.width;
+        const imgH = bgImg.naturalHeight || bgImg.height;
+        const roomAR = room.w / room.h;
+        const imgAR = imgW / imgH;
+        let dw: number, dh: number, dx: number, dy: number;
+        if (imgAR > roomAR) {
+          // Image wider than room → fit height, crop sides
+          dh = room.h;
+          dw = room.h * imgAR;
+          dx = room.x - (dw - room.w) / 2;
+          dy = room.y;
+        } else {
+          // Image taller than room → fit width, crop top/bottom
+          dw = room.w;
+          dh = room.w / imgAR;
+          dx = room.x;
+          dy = room.y - (dh - room.h) / 2;
+        }
+        ctx.drawImage(bgImg, dx, dy, dw, dh);
         ctx.restore();
         continue;
       }

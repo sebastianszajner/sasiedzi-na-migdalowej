@@ -109,6 +109,7 @@ export function renderGame(ctx: CanvasRenderingContext2D, state: GameState): voi
   renderCityLibrary(ctx, state);
   renderCityPark(ctx, state);
   renderSkatePark(ctx, state);
+  renderSkateParkRight(ctx, state);
   renderBasketballCourt(ctx, state);
   renderBikePath(ctx, state);
   renderStreet(ctx, state);
@@ -8108,6 +8109,114 @@ function renderSkatePark(ctx: CanvasRenderingContext2D, state: GameState): void 
   ctx.font = 'bold 14px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('🛹 SKATE PARK', (sx + ex) / 2, gY - 290);
+}
+
+// ---- Skatepark RIGHT (x:8000 to 8600) ----
+function renderSkateParkRight(ctx: CanvasRenderingContext2D, state: GameState): void {
+  const cam = state.camera;
+  if (cam.x > 8700 || cam.x + CANVAS_W / cam.zoom < 7900) return;
+
+  const gY = 556;
+  const sx = 8000;
+  const ex = 8600;
+
+  // Concrete ground
+  ctx.fillStyle = '#A0A0A0';
+  ctx.fillRect(sx, gY - 4, ex - sx, 8);
+
+  // Quarter pipe left
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(sx + 30, gY);
+  ctx.quadraticCurveTo(sx + 30, gY - 110, sx + 130, gY - 110);
+  ctx.stroke();
+  ctx.fillStyle = '#C0C0C0';
+  ctx.beginPath();
+  ctx.moveTo(sx + 30, gY);
+  ctx.quadraticCurveTo(sx + 30, gY - 100, sx + 130, gY - 100);
+  ctx.lineTo(sx + 130, gY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Quarter pipe right
+  ctx.strokeStyle = '#888';
+  ctx.beginPath();
+  ctx.moveTo(sx + 570, gY);
+  ctx.quadraticCurveTo(sx + 570, gY - 110, sx + 470, gY - 110);
+  ctx.stroke();
+  ctx.fillStyle = '#C0C0C0';
+  ctx.beginPath();
+  ctx.moveTo(sx + 570, gY);
+  ctx.quadraticCurveTo(sx + 570, gY - 100, sx + 470, gY - 100);
+  ctx.lineTo(sx + 470, gY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Grind rail (center)
+  ctx.strokeStyle = '#555';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(sx + 150, gY - 46);
+  ctx.lineTo(sx + 270, gY - 46);
+  ctx.stroke();
+  ctx.fillStyle = '#444';
+  ctx.fillRect(sx + 160, gY - 46, 4, 46);
+  ctx.fillRect(sx + 260, gY - 46, 4, 46);
+
+  // Funbox (center-right)
+  ctx.fillStyle = '#B0B0B0';
+  ctx.beginPath();
+  ctx.moveTo(sx + 330, gY);
+  ctx.lineTo(sx + 350, gY - 66);
+  ctx.lineTo(sx + 430, gY - 66);
+  ctx.lineTo(sx + 450, gY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Small kickers
+  ctx.fillStyle = '#A8A8A8';
+  for (const kx of [sx + 200, sx + 420]) {
+    ctx.beginPath();
+    ctx.moveTo(kx, gY);
+    ctx.lineTo(kx + 10, gY - 26);
+    ctx.lineTo(kx + 40, gY - 26);
+    ctx.lineTo(kx + 50, gY);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // LED lights
+  const t = state.time || 0;
+  for (let i = 0; i < 4; i++) {
+    const lx = sx + 100 + i * 120;
+    const hue = ((t * 60 + i * 90) % 360);
+    ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+    ctx.beginPath();
+    ctx.arc(lx, gY - 120, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Graffiti wall backdrop
+  ctx.fillStyle = '#D0D0D0';
+  ctx.fillRect(sx + 10, gY - 200, 100, 120);
+  const graffitiR = ['#E91E63', '#00BCD4', '#8BC34A', '#FF5722'];
+  for (let i = 0; i < 4; i++) {
+    ctx.fillStyle = graffitiR[i];
+    ctx.beginPath();
+    ctx.arc(sx + 30 + i * 22, gY - 150 + Math.cos(i * 3) * 15, 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Label
+  ctx.fillStyle = '#555';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🛹 SKATE PARK', (sx + ex) / 2, gY - 210);
+  ctx.textAlign = 'left';
 }
 
 // ---- Basketball Court (x:-3400 to -2600) ----

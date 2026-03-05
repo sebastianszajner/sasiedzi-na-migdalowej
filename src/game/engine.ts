@@ -1922,11 +1922,11 @@ export function toggleVehicle(state: GameState): void {
     return;
   }
 
-  // Find nearest parked vehicle within 60px
+  // Find nearest parked vehicle within range
   const px = state.player.x + state.player.w / 2;
   const py = state.player.y + state.player.h;
   let nearest: Vehicle | null = null;
-  let nearestDist = 80;
+  let nearestDist = 160;
   for (const v of state.vehicles) {
     if (v.active) continue;
     const dx = Math.abs(v.x - px);

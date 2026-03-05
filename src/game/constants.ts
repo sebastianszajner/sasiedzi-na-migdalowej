@@ -209,6 +209,21 @@ export const CITY_PLAYGROUND = {
   trampolineX: -6600,
 };
 
+// Skatepark 2 (right side — between school and park)
+export const SKATE_PARK_RIGHT = {
+  startX: 8000,
+  endX: 8600,
+  y: 556,
+  halfpipeEdgeY: 420,
+  quarterPipeY: 460,
+  railY: 510,
+  grindRailX: 8150,
+  grindRailW: 120,
+  funboxX: 8350,
+  funboxW: 80,
+  bgColor: '#909090',
+};
+
 // Park behind school (right of school yard)
 export const PARK_BEHIND_SCHOOL = {
   startX: 8600,
@@ -240,17 +255,20 @@ export const VEHICLE_DEFS = {
   bike_kid:      { speed: 4.5, jumpForce: -10, w: 44, h: 30, tricks: ['bunnyHop', 'wheelie'] as const, label: 'Rower dziecięcy' },
   bike_bmx:      { speed: 6.5, jumpForce: -14, w: 44, h: 30, tricks: ['bunnyHop', 'wheelie', 'manual', 'backflip', 'grind', 'airSpin', 'tailwhip', 'barspin', 'superman', 'noHander', 'spin360', 'tabletop'] as const, label: 'BMX' },
   bike_mountain: { speed: 5.5, jumpForce: -12, w: 48, h: 32, tricks: ['bunnyHop', 'wheelie', 'manual', 'stoppie'] as const, label: 'Rower górski' },
-  bike_road:     { speed: 8.0, jumpForce: -9,  w: 50, h: 30, tricks: ['wheelie', 'manual'] as const, label: 'Kolażówka' },
+  bike_road:     { speed: 8.0, jumpForce: -9,  w: 50, h: 30, tricks: ['wheelie', 'manual'] as const, label: 'Szosówka' },
 } as const;
 
 // Vehicle spawn locations
 export const VEHICLE_SPAWNS = [
   { id: 'bike_kid_garage',  type: 'bike_kid' as const,     x: -130, y: 520 },  // garage
   { id: 'scooter_zabka',    type: 'scooter' as const,      x: -700, y: 540 },  // near Żabka
-  { id: 'rollers_skatepark', type: 'rollerblades' as const, x: -4200, y: 540 }, // skatepark
+  { id: 'rollers_skatepark', type: 'rollerblades' as const, x: -4200, y: 540 }, // skatepark left
   { id: 'bmx_track',        type: 'bike_bmx' as const,     x: -2100, y: 540 }, // bike path / BMX
   { id: 'mountain_sport',   type: 'bike_mountain' as const, x: -3000, y: 540 }, // between basketball & skatepark
   { id: 'road_school',      type: 'bike_road' as const,    x: 5200, y: 540 },  // near school
+  { id: 'bmx_skatepark_r',  type: 'bike_bmx' as const,     x: 8200, y: 540 },  // skatepark right BMX
+  { id: 'scooter_skatepark_r', type: 'scooter' as const,   x: 8400, y: 540 },  // skatepark right scooter
+  { id: 'rollers_skatepark_r', type: 'rollerblades' as const, x: 8500, y: 540 }, // skatepark right rollers
 ] as const;
 
 // Trick scores

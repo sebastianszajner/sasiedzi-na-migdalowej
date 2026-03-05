@@ -476,15 +476,23 @@ export const LEVEL_1: LevelData = {
     { x: -6950, y: 420, w: 60, h: 8 },   // climbing level 2
     { x: -6900, y: 350, w: 60, h: 8 },   // climbing level 3
     { x: -6600, y: 530, w: 40, h: 8 },   // trampoline platform (bounce handled in engine)
+    // === SKATEPARK RIGHT (between school and park) ===
+    { x: 8000, y: 556, w: 600, h: 12 },   // skatepark R ground
+    { x: 8050, y: 460, w: 80, h: 8 },     // quarter pipe lip left
+    { x: 8470, y: 460, w: 80, h: 8 },     // quarter pipe lip right
+    { x: 8150, y: 510, w: 120, h: 6 },    // grind rail
+    { x: 8350, y: 490, w: 80, h: 8 },     // funbox top
+    { x: 8200, y: 530, w: 40, h: 6 },     // small kicker
+    { x: 8420, y: 530, w: 40, h: 6 },     // small kicker 2
     // === OSIEDLE floors ===
     { x: 9500, y: 556, w: 1500, h: 12 },  // Osiedle ground floor
     { x: 9500, y: 380, w: 1500, h: 12 },  // Osiedle floor 2
   ],
 
   walls: [
-    // Żabka walls
-    { x: ZABKA.x - 4, y: ZABKA.y, w: 8, h: ZABKA.h },  // Żabka left wall
-    { x: ZABKA.x + ZABKA.w - 4, y: ZABKA.y, w: 8, h: ZABKA.h }, // Żabka right wall
+    // Żabka walls — gap at y:420-556 for ground-level door entry
+    { x: ZABKA.x - 4, y: ZABKA.y, w: 8, h: 88 },  // Żabka left wall upper (332-420), gap 420-556
+    { x: ZABKA.x + ZABKA.w - 4, y: ZABKA.y, w: 8, h: 88 }, // Żabka right wall upper (332-420), gap 420-556
     // House
     { x: -204, y: 332, w: 8, h: 88 },           // garage left wall (332-420), gap 420-556 = ground-level garage door
     { x: 76, y: HOUSE.atticCeilingY, w: 8, h: 332 - HOUSE.atticCeilingY }, // left house wall upper (attic to 1st floor)

@@ -5,7 +5,7 @@
 // ==========================================
 
 import type { GameState, NPC, CostumeItem, InteractiveObject } from './types';
-import { CANVAS_W, CANVAS_H, HOUSE, GARDEN, TERRACE, STREET, GARAGE, BINS, ITEM_FLOAT_AMP, ITEM_EMOJIS, ARTIFACT_EMOJIS, ZABKA, PACZKOMAT, COLORS, VESTIBULE, FRONT_GARDEN, PERGOLA, SKATE_PARK, BASKETBALL, BIKE_PATH, PRZEDSZKOLE, SZKOLA, VEHICLE_DEFS } from './constants';
+import { CANVAS_W, CANVAS_H, HOUSE, GARDEN, TERRACE, STREET, GARAGE, BINS, ITEM_FLOAT_AMP, ITEM_EMOJIS, ARTIFACT_EMOJIS, ZABKA, PACZKOMAT, COLORS, VESTIBULE, FRONT_GARDEN, PERGOLA, SKATE_PARK, BASKETBALL, BIKE_PATH, PRZEDSZKOLE, SZKOLA, VEHICLE_DEFS, BALANCE, TRICK_DEFS, KINDERGARTEN_GAMES } from './constants';
 import { getFace } from './faces';
 
 let _wallpaperCache: Map<string, CanvasPattern> | null = null;
@@ -173,6 +173,8 @@ export function renderGame(ctx: CanvasRenderingContext2D, state: GameState): voi
   renderDoorbellNotification(ctx, state);
   renderDayNightOverlay(ctx, state);
   renderBikeRaceHUD(ctx, state);
+  renderBalanceMeter(ctx, state);
+  renderMinigameOverlay(ctx, state);
   renderScreenTransition(ctx, state);
 }
 
@@ -6804,12 +6806,10 @@ function renderVehicles(ctx: CanvasRenderingContext2D, state: GameState): void {
       ctx.fillStyle = '#FFD700';
       ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
-      const trickNames: Record<string, string> = {
-        bunnyHop: 'Bunny Hop!', wheelie: 'Wheelie!', manual: 'Manual!',
-        grind: 'Grind!', backflip: 'Backflip!', stoppie: 'Stoppie!',
-        airSpin: 'Air Spin!', kickflip: 'Kickflip!', slide: 'Slide!',
-      };
-      ctx.fillText(trickNames[v.trickState] || v.trickState, px, state.player.y - 20);
+      const td = TRICK_DEFS[v.trickState];
+      const trickLabel = td ? `${td.emoji} ${td.name}!` : v.trickState;
+      ctx.fillStyle = td?.color || ctx.fillStyle;
+      ctx.fillText(trickLabel, px, state.player.y - 20);
     }
 
     // Combo indicator
@@ -9660,5 +9660,172 @@ function renderScreenTransition(ctx: CanvasRenderingContext2D, state: GameState)
     ctx.translate(-CANVAS_W / 2, -CANVAS_H / 2);
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
     ctx.restore();
+  }
+}
+
+// ---- BALANCE METER (wheelie/manual) ----
+function renderBalanceMeter(ctx: CanvasRenderingContext2D, state: GameState): void {
+  const v = state.activeVehicle;
+  if (!v || !v.active) return;
+  if (v.trickState !== 'wheelie' && v.trickState !== 'manual') return;
+
+  const cx = CANVAS_W / 2;
+  const y = CANVAS_H - 50;
+  const barW = 200;
+  const barH = 12;
+
+  // Background bar
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.beginPath(); ctx.roundRect(cx - barW / 2 - 2, y - 2, barW + 4, barH + 4, 4);
+  ctx.fill();
+
+  // Perfect zone (green center)
+  const perfectW = (BALANCE.perfectZone / 100) * barW;
+  ctx.fillStyle = 'rgba(76, 175, 80, 0.4)';
+  ctx.fillRect(cx - perfectW / 2, y, perfectW, barH);
+
+  // Danger zones (red edges)
+  const dangerW = ((100 - BALANCE.failThreshold) / 100) * barW;
+  ctx.fillStyle = 'rgba(244, 67, 54, 0.4)';
+  ctx.fillRect(cx - barW / 2, y, dangerW, barH);
+  ctx.fillRect(cx + barW / 2 - dangerW, y, dangerW, barH);
+
+  // Indicator needle
+  const needleX = cx + (v.balanceMeter / 100) * (barW / 2);
+  ctx.fillStyle = Math.abs(v.balanceMeter) < BALANCE.perfectZone ? '#4CAF50' :
+                  Math.abs(v.balanceMeter) > BALANCE.failThreshold * 0.8 ? '#F44336' : '#FFC107';
+  ctx.fillRect(needleX - 2, y - 3, 4, barH + 6);
+
+  // Label
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 10px system-ui';
+  ctx.textAlign = 'center';
+  const td = TRICK_DEFS[v.trickState];
+  ctx.fillText(`${td?.emoji || '⚖️'} ${td?.name || v.trickState} — ← → balans`, cx, y - 8);
+
+  // Speed boost indicator
+  if (v.speedBoost > 0.05) {
+    ctx.fillStyle = `rgba(255, 152, 0, ${v.speedBoost})`;
+    ctx.font = 'bold 11px system-ui';
+    ctx.fillText(`🚀 BOOST ${Math.round(v.speedBoost * 40)}%`, cx, y - 22);
+  }
+}
+
+// ---- KINDERGARTEN MINIGAME OVERLAY ----
+function renderMinigameOverlay(ctx: CanvasRenderingContext2D, state: GameState): void {
+  if (!state.minigame || state.phase !== 'minigame') return;
+  const mg = state.minigame;
+  const gameData = KINDERGARTEN_GAMES[mg.type as keyof typeof KINDERGARTEN_GAMES];
+
+  // Full screen overlay
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  const cx = CANVAS_W / 2;
+  const panelW = 500;
+  const panelH = 380;
+  const px = cx - panelW / 2;
+  const py = 60;
+
+  // Panel background
+  ctx.fillStyle = '#FFF8E1';
+  ctx.beginPath(); ctx.roundRect(px, py, panelW, panelH, 16);
+  ctx.fill();
+  ctx.strokeStyle = '#FFB300';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.roundRect(px, py, panelW, panelH, 16);
+  ctx.stroke();
+
+  // Header
+  ctx.fillStyle = '#FF6F00';
+  ctx.beginPath(); ctx.roundRect(px, py, panelW, 50, 16);
+  ctx.fill();
+  // Clip bottom corners of header
+  ctx.fillStyle = '#FF6F00';
+  ctx.fillRect(px, py + 34, panelW, 16);
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 22px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${gameData?.emoji || '🎮'} ${mg.name} — Runda ${mg.round}/${mg.maxRounds}`, cx, py + 33);
+
+  // Streak
+  if (mg.streak > 0) {
+    ctx.fillStyle = '#4CAF50';
+    ctx.font = 'bold 14px system-ui';
+    ctx.fillText(`🔥 Seria: ${mg.streak}`, cx, py + 65);
+  }
+
+  // Question
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 20px system-ui';
+  ctx.textAlign = 'center';
+  const qY = py + 100;
+  ctx.fillText(mg.question, cx, qY);
+
+  // Options
+  const optY = qY + 40;
+  const optH = 45;
+  const optW = panelW - 40;
+  for (let i = 0; i < mg.options.length; i++) {
+    const oy = optY + i * (optH + 8);
+    let bgColor = '#ECEFF1';
+    if (mg.answered) {
+      if (i === mg.correctIndex) bgColor = '#C8E6C9'; // green for correct
+      else if (i === mg.selectedIndex) bgColor = '#FFCDD2'; // red for wrong selection
+    }
+    ctx.fillStyle = bgColor;
+    ctx.beginPath(); ctx.roundRect(px + 20, oy, optW, optH, 10);
+    ctx.fill();
+    ctx.strokeStyle = i === mg.selectedIndex ? '#333' : '#BDBDBD';
+    ctx.lineWidth = i === mg.selectedIndex ? 2 : 1;
+    ctx.beginPath(); ctx.roundRect(px + 20, oy, optW, optH, 10);
+    ctx.stroke();
+
+    // Number key indicator
+    ctx.fillStyle = '#FF6F00';
+    ctx.font = 'bold 16px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${i + 1}`, px + 35, oy + 30);
+
+    // Option text
+    ctx.fillStyle = '#333';
+    ctx.font = '16px system-ui';
+    ctx.fillText(mg.options[i].label, px + 60, oy + 30);
+  }
+
+  // Result feedback
+  if (mg.answered) {
+    ctx.fillStyle = mg.correct ? '#4CAF50' : '#F44336';
+    ctx.font = 'bold 18px system-ui';
+    ctx.textAlign = 'center';
+    const feedbackY = optY + mg.options.length * (optH + 8) + 10;
+    ctx.fillText(mg.correct ? '✅ Brawo! Dobrze!' : '❌ Nie tym razem...', cx, feedbackY);
+    ctx.fillStyle = '#666';
+    ctx.font = '13px system-ui';
+    ctx.fillText(mg.round < mg.maxRounds ? 'Naciśnij SPACJĘ → następne pytanie' : 'Naciśnij SPACJĘ → zakończ', cx, feedbackY + 22);
+  } else {
+    ctx.fillStyle = '#999';
+    ctx.font = '13px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Wybierz odpowiedź: 1, 2, 3 lub 4  |  ESC = wyjdź', cx, py + panelH - 15);
+  }
+
+  // Skill progress bar (bottom)
+  if (gameData) {
+    const skill = gameData.skill;
+    const progress = state.kindergartenProgress.skills[skill as keyof typeof state.kindergartenProgress.skills] || 0;
+    const barW2 = panelW - 40;
+    const barY = py + panelH + 10;
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.beginPath(); ctx.roundRect(px + 20, barY, barW2, 20, 6);
+    ctx.fill();
+    ctx.fillStyle = '#FF6F00';
+    ctx.beginPath(); ctx.roundRect(px + 20, barY, barW2 * (progress / 100), 20, 6);
+    ctx.fill();
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${gameData.emoji} ${gameData.name}: ${progress}/100`, cx, barY + 14);
   }
 }

@@ -309,18 +309,32 @@ export interface Climbable {
 
 // ---- Vehicles (bikes, scooter, rollerblades) ----
 export type VehicleType = 'scooter' | 'rollerblades' | 'bike_kid' | 'bike_bmx' | 'bike_mountain' | 'bike_road';
-export type TrickState = 'none' | 'bunnyHop' | 'wheelie' | 'manual' | 'grind' | 'backflip' | 'stoppie' | 'airSpin' | 'kickflip' | 'slide';
+export type TrickState = 'none' | 'bunnyHop' | 'wheelie' | 'manual' | 'grind' | 'backflip' | 'stoppie' | 'airSpin' | 'kickflip' | 'slide'
+  | 'tailwhip' | 'barspin' | 'superman' | 'noHander' | 'spin360' | 'tabletop';
+
+export type TrickTier = 'basic' | 'intermediate' | 'advanced' | 'pro';
+
+export interface TrickDef {
+  name: string;
+  score: number;
+  tier: TrickTier;
+  emoji: string;
+  color: string;
+  airOnly: boolean;       // requires being in the air
+  vehicles: VehicleType[]; // which vehicles can do this
+  unlockRequirement: number; // total trick score needed to unlock
+}
 
 export interface Vehicle {
   id: string;
   type: VehicleType;
   x: number;
   y: number;
-  parkX: number;          // original spawn/parking position
+  parkX: number;
   parkY: number;
   vx: number;
   dir: 1 | -1;
-  active: boolean;        // Kuba is riding this vehicle
+  active: boolean;
   trickState: TrickState;
   trickTimer: number;
   trickScore: number;
@@ -328,6 +342,14 @@ export interface Vehicle {
   comboTimer: number;
   wheelieAngle: number;
   airRotation: number;
+  // BMX expansion
+  balanceMeter: number;      // -100..100 (0 = perfect balance for wheelie/manual)
+  totalTrickScore: number;   // lifetime score for unlocking tricks
+  unlockedTricks: TrickState[];
+  trickChain: TrickState[];  // current combo chain for bonus
+  speedBoost: number;        // temporary speed boost after tricks (0..1)
+  grindSparks: boolean;      // visual: sparks during grind
+  landingDust: boolean;      // visual: dust on landing
 }
 
 // ---- RC Car ----
@@ -346,7 +368,47 @@ export interface RCCar {
 export type GamePhase =
   | 'start' | 'playing' | 'dialog' | 'math'
   | 'celebration' | 'level_complete'
-  | 'wardrobe' | 'achievements' | 'quest_select';
+  | 'wardrobe' | 'achievements' | 'quest_select'
+  | 'minigame';
+
+// ---- Kindergarten Mini-Games ----
+export type MinigameType = 'rebus' | 'colors' | 'counting' | 'shapes' | 'letters' | 'memory' | 'rhythm';
+
+export interface MinigameState {
+  type: MinigameType;
+  name: string;
+  roomName: string;        // which room triggered it
+  question: string;
+  options: MinigameOption[];
+  correctIndex: number;
+  selectedIndex: number;
+  answered: boolean;
+  correct: boolean;
+  streak: number;          // consecutive correct answers
+  round: number;           // current round
+  maxRounds: number;       // rounds per session
+  skillPoints: Record<string, number>; // earned skill points
+  timer: number;           // optional time limit
+  difficulty: 1 | 2 | 3;
+}
+
+export interface MinigameOption {
+  label: string;
+  emoji?: string;
+  color?: string;
+}
+
+// ---- Kindergarten Skill System ----
+export type KinderSkill = 'logika' | 'kreatywnosc' | 'liczenie' | 'litery' | 'kolory' | 'rytm' | 'pamiec';
+
+export interface KinderProgress {
+  skills: Record<KinderSkill, number>;  // 0-100 per skill
+  totalGames: number;
+  totalCorrect: number;
+  bestStreak: number;
+  level: number;           // 1-5 (Żółwik → Mistrz)
+  badges: string[];        // earned badges
+}
 
 export type QuestCategory = 'codzienne' | 'przygody' | 'higiena' | 'specjalne' | 'posilki';
 
@@ -426,6 +488,9 @@ export interface GameState {
   season: SeasonType;
   // Bike races
   bikeRace: BikeRace | null;
+  // Kindergarten mini-games
+  minigame: MinigameState | null;
+  kindergartenProgress: KinderProgress;
 }
 
 // ---- Bike Race ----

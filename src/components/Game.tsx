@@ -13,6 +13,7 @@ import {
   advanceDialog, answerMath, equipCostume, setWeather, setSeason,
   tryInteractObject, playerCrouchOrLie, loadSave, clearSave,
   toggleRCControl, toggleVehicle, selectQuest, startBikeRace,
+  startMinigame, answerMinigame, nextMinigameRound,
 } from '../game/engine';
 import { renderGame, renderIntro } from '../game/renderer';
 import { LEVEL_1 } from '../game/level';
@@ -222,8 +223,20 @@ export default function Game() {
           e.preventDefault();
           if (playerJump(state)) sfxJump();
         }
-        if (e.key === 'ArrowUp') {
+        if (e.key === 'ArrowUp' || e.key === 'e' || e.key === 'E') {
           e.preventDefault();
+          // Try kindergarten minigame first (E key in przedszkole rooms)
+          if (e.key === 'e' || e.key === 'E') {
+            const px = state.player.x + state.player.w / 2;
+            const py = state.player.y + state.player.h / 2;
+            const currentRoom = state.rooms.find(r =>
+              px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h
+            );
+            if (currentRoom && startMinigame(state, currentRoom.name)) {
+              setPhase('minigame');
+              return;
+            }
+          }
           const result = playerInteract(state);
           if (result) sfxDialog();
         }
@@ -289,6 +302,22 @@ export default function Game() {
           e.preventDefault();
           advanceDialog(state);
           sfxDialogAdvance();
+        }
+      }
+
+      // Minigame answer keys (1-4) and next round (Space/Enter)
+      if (state.phase === 'minigame' && state.minigame) {
+        if (['1', '2', '3', '4'].includes(e.key) && !state.minigame.answered) {
+          answerMinigame(state, parseInt(e.key) - 1);
+        }
+        if ((e.key === ' ' || e.key === 'Enter') && state.minigame.answered) {
+          nextMinigameRound(state);
+          if (!state.minigame) setPhase('playing');
+        }
+        if (e.key === 'Escape') {
+          state.minigame = null;
+          state.phase = 'playing';
+          setPhase('playing');
         }
       }
 

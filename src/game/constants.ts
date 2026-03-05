@@ -238,7 +238,7 @@ export const VEHICLE_DEFS = {
   scooter:       { speed: 5.0, jumpForce: -11, w: 40, h: 28, tricks: ['bunnyHop', 'manual', 'kickflip'] as const, label: 'Hulajnoga' },
   rollerblades:  { speed: 6.0, jumpForce: -10, w: 32, h: 24, tricks: ['grind', 'slide', 'airSpin'] as const, label: 'Rolki' },
   bike_kid:      { speed: 4.5, jumpForce: -10, w: 44, h: 30, tricks: ['bunnyHop', 'wheelie'] as const, label: 'Rower dziecięcy' },
-  bike_bmx:      { speed: 6.5, jumpForce: -14, w: 44, h: 30, tricks: ['bunnyHop', 'wheelie', 'manual', 'backflip', 'grind', 'airSpin'] as const, label: 'BMX' },
+  bike_bmx:      { speed: 6.5, jumpForce: -14, w: 44, h: 30, tricks: ['bunnyHop', 'wheelie', 'manual', 'backflip', 'grind', 'airSpin', 'tailwhip', 'barspin', 'superman', 'noHander', 'spin360', 'tabletop'] as const, label: 'BMX' },
   bike_mountain: { speed: 5.5, jumpForce: -12, w: 48, h: 32, tricks: ['bunnyHop', 'wheelie', 'manual', 'stoppie'] as const, label: 'Rower górski' },
   bike_road:     { speed: 8.0, jumpForce: -9,  w: 50, h: 30, tricks: ['wheelie', 'manual'] as const, label: 'Kolażówka' },
 } as const;
@@ -264,6 +264,140 @@ export const TRICK_SCORES: Record<string, number> = {
   airSpin: 30,
   kickflip: 25,
   slide: 15,
+  // New BMX tricks
+  tailwhip: 40,
+  barspin: 35,
+  superman: 45,
+  noHander: 30,
+  spin360: 60,
+  tabletop: 25,
+};
+
+// Trick definitions with tiers and unlock requirements
+export const TRICK_DEFS: Record<string, { name: string; tier: string; emoji: string; color: string; airOnly: boolean; unlock: number }> = {
+  bunnyHop:  { name: 'Bunny Hop',   tier: 'basic',        emoji: '🐰', color: '#4CAF50', airOnly: false, unlock: 0 },
+  wheelie:   { name: 'Wheelie',     tier: 'basic',        emoji: '🎯', color: '#FF9800', airOnly: false, unlock: 0 },
+  manual:    { name: 'Manual',      tier: 'basic',        emoji: '⚖️', color: '#2196F3', airOnly: false, unlock: 0 },
+  grind:     { name: 'Grind',       tier: 'basic',        emoji: '⚡', color: '#FFC107', airOnly: false, unlock: 0 },
+  kickflip:  { name: 'Kickflip',    tier: 'intermediate', emoji: '🔄', color: '#9C27B0', airOnly: true,  unlock: 50 },
+  slide:     { name: 'Slide',       tier: 'basic',        emoji: '💨', color: '#607D8B', airOnly: false, unlock: 0 },
+  stoppie:   { name: 'Stoppie',     tier: 'intermediate', emoji: '🛑', color: '#F44336', airOnly: false, unlock: 30 },
+  backflip:  { name: 'Backflip',    tier: 'intermediate', emoji: '🔥', color: '#FF5722', airOnly: true,  unlock: 100 },
+  airSpin:   { name: 'Air Spin',    tier: 'intermediate', emoji: '🌀', color: '#2196F3', airOnly: true,  unlock: 80 },
+  // New tricks
+  tabletop:  { name: 'Tabletop',    tier: 'intermediate', emoji: '📐', color: '#8BC34A', airOnly: true,  unlock: 120 },
+  noHander:  { name: 'No Hander',   tier: 'advanced',     emoji: '🙌', color: '#00BCD4', airOnly: true,  unlock: 200 },
+  barspin:   { name: 'Barspin',     tier: 'advanced',     emoji: '🔃', color: '#E91E63', airOnly: true,  unlock: 250 },
+  tailwhip:  { name: 'Tailwhip',    tier: 'advanced',     emoji: '🌪️', color: '#FF6F00', airOnly: true,  unlock: 350 },
+  superman:  { name: 'Superman',    tier: 'pro',          emoji: '🦸', color: '#D50000', airOnly: true,  unlock: 500 },
+  spin360:   { name: '360 Spin',    tier: 'pro',          emoji: '💫', color: '#FFD600', airOnly: true,  unlock: 750 },
+};
+
+// Balance meter config
+export const BALANCE = {
+  driftSpeed: 15,      // how fast balance drifts during wheelie/manual (per second)
+  correctSpeed: 40,    // how fast player can correct with arrow keys
+  failThreshold: 85,   // balance > this = trick fails
+  perfectZone: 15,     // |balance| < this = perfect multiplier
+  perfectBonus: 1.5,   // score multiplier in perfect zone
+};
+
+// Trick tier labels
+export const TRICK_TIER_LABELS: Record<string, string> = {
+  basic: '🟢 Podstawowy',
+  intermediate: '🟡 Średni',
+  advanced: '🔴 Zaawansowany',
+  pro: '🏆 Pro',
+};
+
+// ---- Kindergarten Mini-Games ----
+export const KINDERGARTEN_GAMES = {
+  rebus: {
+    name: 'Rebusy',
+    emoji: '🧩',
+    skill: 'logika' as const,
+    rooms: ['Sala Motylki', 'Sala Biedronki', 'Sala Słoniki', 'Sala Zajęć'],
+    puzzles: [
+      { question: 'Co powstanie z: 🌞 + 🌻?', options: ['Słonecznik', 'Księżyc', 'Deszcz', 'Śnieg'], correct: 0 },
+      { question: 'Co powstanie z: 🏠 + 🐱?', options: ['Domek dla kota', 'Szkoła', 'Sklep', 'Park'], correct: 0 },
+      { question: 'Co powstanie z: 🎂 + 🕯️?', options: ['Urodziny', 'Obiad', 'Śniadanie', 'Kolacja'], correct: 0 },
+      { question: 'Co powstanie z: ❄️ + ⛄?', options: ['Bałwan', 'Lato', 'Wiosna', 'Jesień'], correct: 0 },
+      { question: 'Co powstanie z: 🎨 + 🖌️?', options: ['Obraz', 'Książka', 'Muzyka', 'Taniec'], correct: 0 },
+      { question: 'Co powstanie z: 🥛 + 🍪?', options: ['Podwieczorek', 'Obiad', 'Zupa', 'Sałatka'], correct: 0 },
+      { question: 'Co powstanie z: 📚 + 👓?', options: ['Czytanie', 'Bieganie', 'Spanie', 'Jedzenie'], correct: 0 },
+      { question: 'Co powstanie z: 🎵 + 🥁?', options: ['Koncert', 'Cisza', 'Sen', 'Szkoła'], correct: 0 },
+    ],
+  },
+  colors: {
+    name: 'Kolory',
+    emoji: '🎨',
+    skill: 'kolory' as const,
+    rooms: ['Sala Zajęć', 'Sala Motylki'],
+    puzzles: [
+      { question: 'Jaki kolor ma słońce? ☀️', options: ['🟡 Żółty', '🔴 Czerwony', '🔵 Niebieski', '🟢 Zielony'], correct: 0 },
+      { question: 'Jaki kolor ma trawa? 🌿', options: ['🟢 Zielony', '🟡 Żółty', '🔴 Czerwony', '🔵 Niebieski'], correct: 0 },
+      { question: 'Jaki kolor ma niebo? ☁️', options: ['🔵 Niebieski', '🟢 Zielony', '🟡 Żółty', '🔴 Czerwony'], correct: 0 },
+      { question: 'Jaki kolor ma pomidor? 🍅', options: ['🔴 Czerwony', '🔵 Niebieski', '🟢 Zielony', '🟡 Żółty'], correct: 0 },
+      { question: 'Po zmieszaniu 🔴+🔵 powstanie:', options: ['🟣 Fioletowy', '🟢 Zielony', '🟡 Żółty', '🟠 Pomarańczowy'], correct: 0 },
+      { question: 'Po zmieszaniu 🔴+🟡 powstanie:', options: ['🟠 Pomarańczowy', '🟣 Fioletowy', '🟢 Zielony', '🔵 Niebieski'], correct: 0 },
+    ],
+  },
+  counting: {
+    name: 'Liczenie',
+    emoji: '🔢',
+    skill: 'liczenie' as const,
+    rooms: ['Sala Biedronki', 'Sala Słoniki'],
+    puzzles: [
+      { question: 'Ile to: 🍎🍎🍎?', options: ['3', '2', '4', '5'], correct: 0 },
+      { question: 'Ile to: 2 + 3 = ?', options: ['5', '4', '6', '3'], correct: 0 },
+      { question: 'Ile to: 🐱🐱🐱🐱?', options: ['4', '3', '5', '6'], correct: 0 },
+      { question: 'Ile to: 5 - 2 = ?', options: ['3', '2', '4', '5'], correct: 0 },
+      { question: 'Ile to: ⭐⭐⭐⭐⭐?', options: ['5', '4', '6', '3'], correct: 0 },
+      { question: 'Ile to: 1 + 1 + 1 = ?', options: ['3', '2', '4', '1'], correct: 0 },
+      { question: 'Co jest większe: 7 czy 4?', options: ['7', '4', 'Tyle samo', 'Nie wiem'], correct: 0 },
+      { question: 'Ile nóg ma pies? 🐕', options: ['4', '2', '6', '3'], correct: 0 },
+    ],
+  },
+  shapes: {
+    name: 'Kształty',
+    emoji: '🔷',
+    skill: 'logika' as const,
+    rooms: ['Sala Zajęć', 'Korytarz P', 'Korytarz P Góra'],
+    puzzles: [
+      { question: 'To jest: ⬜', options: ['Kwadrat', 'Trójkąt', 'Koło', 'Prostokąt'], correct: 0 },
+      { question: 'To jest: ⭕', options: ['Koło', 'Kwadrat', 'Trójkąt', 'Gwiazda'], correct: 0 },
+      { question: 'To jest: 🔺', options: ['Trójkąt', 'Koło', 'Kwadrat', 'Romb'], correct: 0 },
+      { question: 'Ile boków ma trójkąt?', options: ['3', '4', '2', '5'], correct: 0 },
+      { question: 'Co ma 4 równe boki?', options: ['Kwadrat', 'Trójkąt', 'Koło', 'Pięciokąt'], correct: 0 },
+      { question: 'Piłka ma kształt: ⚽', options: ['Koła', 'Kwadratu', 'Trójkąta', 'Prostokąta'], correct: 0 },
+    ],
+  },
+  letters: {
+    name: 'Literki',
+    emoji: '🔤',
+    skill: 'litery' as const,
+    rooms: ['Sala Zajęć', 'Pokój Nauczycielski P'],
+    puzzles: [
+      { question: 'Jaką literą zaczyna się: 🍎 Jabłko?', options: ['J', 'A', 'K', 'B'], correct: 0 },
+      { question: 'Jaką literą zaczyna się: 🐱 Kot?', options: ['K', 'P', 'M', 'T'], correct: 0 },
+      { question: 'Jaką literą zaczyna się: 🏠 Dom?', options: ['D', 'B', 'G', 'H'], correct: 0 },
+      { question: 'Jaką literą zaczyna się: 🌞 Słońce?', options: ['S', 'Z', 'C', 'Ś'], correct: 0 },
+      { question: 'Jaka samogłoska: A, E, I, O, ...?', options: ['U', 'B', 'C', 'D'], correct: 0 },
+      { question: 'Ile liter ma słowo KOT?', options: ['3', '2', '4', '5'], correct: 0 },
+    ],
+  },
+  memory: {
+    name: 'Pamięć',
+    emoji: '🧠',
+    skill: 'pamiec' as const,
+    rooms: ['Gabinet Dyrektora P', 'Łazienka P'],
+    puzzles: [
+      { question: 'Zapamiętaj: 🍎🍌🍇. Co było drugie?', options: ['🍌 Banan', '🍎 Jabłko', '🍇 Winogrono', '🍊 Pomarańcza'], correct: 0 },
+      { question: 'Zapamiętaj: 🔴🔵🟢. Co było trzecie?', options: ['🟢 Zielony', '🔴 Czerwony', '🔵 Niebieski', '🟡 Żółty'], correct: 0 },
+      { question: 'Zapamiętaj: 🐱🐕🐰. Co było pierwsze?', options: ['🐱 Kot', '🐕 Pies', '🐰 Królik', '🐦 Ptak'], correct: 0 },
+      { question: 'Zapamiętaj: ⭐🌙☀️. Co NIE było?', options: ['🌈 Tęcza', '⭐ Gwiazda', '🌙 Księżyc', '☀️ Słońce'], correct: 0 },
+    ],
+  },
 };
 
 // BMX Pump Track elements (within bike path area -2500 to -1700)

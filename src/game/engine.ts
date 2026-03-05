@@ -8,12 +8,14 @@ import type {
   GameState, Player, NPC, CollectibleItem, DialogState, MathProblem,
   LevelData, ItemType, CostumeSlot, Achievement, InteractiveObject,
   ParallaxCloud, Vehicle, VehicleType, TrickState, RaceType,
+  MinigameType, KinderSkill,
 } from './types';
 import {
   GRAVITY, JUMP_FORCE, MOVE_SPEED, CLIMB_SPEED, MAX_FALL_SPEED,
   FRICTION, PLAYER_W, PLAYER_H, CANVAS_W, CANVAS_H,
   ITEM_FLOAT_SPEED, ITEM_EMOJIS, COMBO, COLORS, GARDEN, HOUSE,
   VEHICLE_DEFS, VEHICLE_SPAWNS, TRICK_SCORES, BIKE_RACES,
+  TRICK_DEFS, BALANCE, KINDERGARTEN_GAMES,
 } from './constants';
 import { getNpcDialog } from './level';
 import {
@@ -203,6 +205,14 @@ export function createGameState(level: LevelData): GameState {
       comboTimer: 0,
       wheelieAngle: 0,
       airRotation: 0,
+      // BMX expansion
+      balanceMeter: 0,
+      totalTrickScore: 0,
+      unlockedTricks: ['bunnyHop', 'wheelie', 'manual', 'grind', 'slide'] as TrickState[],
+      trickChain: [],
+      speedBoost: 0,
+      grindSparks: false,
+      landingDust: false,
     })),
     activeVehicle: null,
     freezeTimer: 0,
@@ -220,6 +230,16 @@ export function createGameState(level: LevelData): GameState {
     season: 'wiosna',
     // Bike races
     bikeRace: null,
+    // Kindergarten mini-games
+    minigame: null,
+    kindergartenProgress: {
+      skills: { logika: 0, kreatywnosc: 0, liczenie: 0, litery: 0, kolory: 0, rytm: 0, pamiec: 0 },
+      totalGames: 0,
+      totalCorrect: 0,
+      bestStreak: 0,
+      level: 1,
+      badges: [],
+    },
   };
 
   // Setup first quest's NPC — emote + visibility (shuffle may pick any quest first)
@@ -611,7 +631,8 @@ function handleInput(state: GameState): void {
     player.lying = false;
 
     const ACCEL = 0.5;
-    const targetVx = left ? -def.speed : right ? def.speed : 0;
+    const boostedSpeed = def.speed * (1 + v.speedBoost * 0.4); // up to 40% speed boost
+    const targetVx = left ? -boostedSpeed : right ? boostedSpeed : 0;
     if (left || right) {
       player.vx += (targetVx - player.vx) * ACCEL;
       player.dir = left ? -1 : 1;
@@ -799,29 +820,33 @@ export function playerJump(state: GameState): boolean {
       spawnJumpParticles(state, player.x + player.w / 2, player.y + player.h);
       return true;
     }
-    // Airborne trick: backflip (BMX) or airSpin
+    // Airborne trick: pick from unlocked air tricks
     if (!player.onGround && player.jumpCount === 1) {
-      if ((def.tricks as readonly string[]).includes('backflip') && v.trickState !== 'backflip') {
-        v.trickState = 'backflip';
+      const airTricks = (def.tricks as readonly string[]).filter(t => {
+        const td = TRICK_DEFS[t];
+        return td && td.airOnly && v.trickState !== t && v.unlockedTricks.includes(t as TrickState);
+      });
+      if (airTricks.length > 0) {
+        // Cycle through air tricks based on combo count (so player gets different tricks each jump)
+        const trickId = airTricks[v.comboCount % airTricks.length] as TrickState;
+        const td = TRICK_DEFS[trickId];
+        v.trickState = trickId;
         v.airRotation = 0;
         v.trickTimer = 0;
         v.comboCount++;
         v.comboTimer = 2;
-        v.trickScore += TRICK_SCORES.backflip || 50;
-        spawnFloatingText(state, player.x + player.w / 2, player.y - 20, 'Backflip!', '#FF5722', 22);
+        const score = TRICK_SCORES[trickId] || 30;
+        v.trickScore += score;
+        v.totalTrickScore += score;
+        v.trickChain.push(trickId);
+        // Unlock check — unlock next tier tricks
+        checkTrickUnlocks(v);
+        spawnFloatingText(state, player.x + player.w / 2, player.y - 20,
+          `${td?.emoji || '🔥'} ${td?.name || trickId}!`, td?.color || '#FF5722', 22);
         player.vy = JUMP_FORCE * 0.7;
         player.jumpCount = 2;
-        return true;
-      } else if ((def.tricks as readonly string[]).includes('airSpin') && v.trickState !== 'airSpin') {
-        v.trickState = 'airSpin';
-        v.airRotation = 0;
-        v.trickTimer = 0;
-        v.comboCount++;
-        v.comboTimer = 2;
-        v.trickScore += TRICK_SCORES.airSpin || 30;
-        spawnFloatingText(state, player.x + player.w / 2, player.y - 20, 'Air Spin!', '#2196F3', 20);
-        player.vy = JUMP_FORCE * 0.7;
-        player.jumpCount = 2;
+        // Speed boost after trick
+        v.speedBoost = Math.min(v.speedBoost + 0.15, 1.0);
         return true;
       }
     }
@@ -1965,19 +1990,39 @@ function updateVehicleTricks(state: GameState, dt: number): void {
     }
   }
 
+  // Balance meter for wheelie/manual
+  if (v.active && (v.trickState === 'wheelie' || v.trickState === 'manual')) {
+    const balanced = updateBalanceMeter(v, dt, state.keys);
+    if (!balanced) {
+      spawnFloatingText(state, state.player.x + state.player.w / 2, state.player.y - 20,
+        '💥 Stracono równowagę!', '#F44336', 16);
+      v.speedBoost = 0;
+    }
+  }
+
+  // Speed boost decay
+  if (v.speedBoost > 0) {
+    v.speedBoost = Math.max(0, v.speedBoost - 0.3 * dt);
+  }
+
   // Combo timer
   if (v.comboTimer > 0) {
     v.comboTimer -= dt;
     if (v.comboTimer <= 0) {
-      // Combo ended — give score
+      // Combo ended — give score + chain bonus
       if (v.comboCount > 1) {
-        const totalScore = Math.floor(v.trickScore * v.comboCount);
+        const chainBonus = v.trickChain.length > 2 ? 1.5 : 1.0;
+        const totalScore = Math.floor(v.trickScore * v.comboCount * chainBonus);
         state.score += totalScore;
+        v.totalTrickScore += totalScore;
+        const chainLabel = v.trickChain.length > 2 ? ' CHAIN!' : '';
         spawnFloatingText(state, state.player.x + state.player.w / 2, state.player.y - 30,
-          `${v.comboCount}x COMBO! +${totalScore}`, '#FFD700', 24);
+          `${v.comboCount}x COMBO${chainLabel} +${totalScore}`, '#FFD700', 24);
+        checkTrickUnlocks(v);
       }
       v.comboCount = 0;
       v.trickScore = 0;
+      v.trickChain = [];
     }
   }
 
@@ -2758,4 +2803,142 @@ function updatePlayerEmotion(state: GameState, dt: number): void {
 function setPlayerEmotion(state: GameState, emotion: Player['emotion'], duration: number): void {
   state.player.emotion = emotion;
   state.player.emotionTimer = duration;
+}
+
+// ---- BMX TRICK UNLOCK SYSTEM ----
+function checkTrickUnlocks(v: Vehicle): void {
+  for (const [trickId, td] of Object.entries(TRICK_DEFS)) {
+    if (!v.unlockedTricks.includes(trickId as TrickState) && v.totalTrickScore >= td.unlock) {
+      v.unlockedTricks.push(trickId as TrickState);
+    }
+  }
+}
+
+// ---- BALANCE METER UPDATE (for wheelie/manual) ----
+function updateBalanceMeter(v: Vehicle, dt: number, keys: Set<string>): boolean {
+  if (v.trickState !== 'wheelie' && v.trickState !== 'manual') {
+    v.balanceMeter = 0;
+    return true; // no fail
+  }
+  // Drift toward fall
+  const driftDir = v.trickState === 'wheelie' ? 1 : -1;
+  v.balanceMeter += driftDir * BALANCE.driftSpeed * dt;
+  // Player correction with left/right keys
+  if (keys.has('ArrowLeft') || keys.has('a')) v.balanceMeter -= BALANCE.correctSpeed * dt;
+  if (keys.has('ArrowRight') || keys.has('d')) v.balanceMeter += BALANCE.correctSpeed * dt;
+  // Clamp
+  v.balanceMeter = Math.max(-100, Math.min(100, v.balanceMeter));
+  // Check fail
+  if (Math.abs(v.balanceMeter) > BALANCE.failThreshold) {
+    v.trickState = 'none';
+    v.balanceMeter = 0;
+    return false; // trick failed
+  }
+  // Perfect zone bonus (score multiplied)
+  return true;
+}
+
+// ---- KINDERGARTEN MINI-GAMES ----
+export function startMinigame(state: GameState, roomName: string): boolean {
+  if (state.minigame) return false;
+  // Find matching game type for this room
+  let gameType: string | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let gameData: any = null;
+  for (const [type, data] of Object.entries(KINDERGARTEN_GAMES)) {
+    if (data.rooms.includes(roomName)) {
+      gameType = type;
+      gameData = data;
+      break;
+    }
+  }
+  if (!gameType || !gameData) return false;
+
+  // Pick random puzzle
+  const puzzleIdx = Math.floor(Math.random() * gameData.puzzles.length);
+  const puzzle = gameData.puzzles[puzzleIdx];
+
+  state.minigame = {
+    type: gameType as MinigameType,
+    name: gameData.name,
+    roomName,
+    question: puzzle.question,
+    options: puzzle.options.map((label: string) => ({ label })),
+    correctIndex: puzzle.correct,
+    selectedIndex: -1,
+    answered: false,
+    correct: false,
+    streak: state.kindergartenProgress.bestStreak > 0 ? 0 : 0, // reset per session
+    round: 1,
+    maxRounds: 3,
+    skillPoints: {},
+    timer: 0,
+    difficulty: 1,
+  };
+  state.phase = 'minigame';
+  return true;
+}
+
+export function answerMinigame(state: GameState, optionIndex: number): void {
+  if (!state.minigame || state.minigame.answered) return;
+  const mg = state.minigame;
+  mg.selectedIndex = optionIndex;
+  mg.answered = true;
+  mg.correct = optionIndex === mg.correctIndex;
+
+  const kp = state.kindergartenProgress;
+  kp.totalGames++;
+
+  if (mg.correct) {
+    kp.totalCorrect++;
+    mg.streak++;
+    if (mg.streak > kp.bestStreak) kp.bestStreak = mg.streak;
+
+    // Add skill points
+    const gameData = KINDERGARTEN_GAMES[mg.type as keyof typeof KINDERGARTEN_GAMES];
+    if (gameData) {
+      const skill = gameData.skill as KinderSkill;
+      kp.skills[skill] = Math.min(100, (kp.skills[skill] || 0) + 5 + mg.streak);
+    }
+    // Score bonus
+    state.score += 10 + mg.streak * 5;
+    spawnFloatingText(state, state.player.x + state.player.w / 2, state.player.y - 30,
+      `✅ Brawo! +${10 + mg.streak * 5} pkt`, '#4CAF50', 20);
+  } else {
+    mg.streak = 0;
+    spawnFloatingText(state, state.player.x + state.player.w / 2, state.player.y - 30,
+      '❌ Spróbuj jeszcze!', '#F44336', 18);
+  }
+
+  // Level up check (every 10 correct answers)
+  const newLevel = Math.min(5, 1 + Math.floor(kp.totalCorrect / 10));
+  if (newLevel > kp.level) {
+    kp.level = newLevel;
+    const levelNames = ['', 'Żółwik', 'Króliczek', 'Sówka', 'Lisek', 'Mistrz'];
+    spawnFloatingText(state, state.player.x + state.player.w / 2, state.player.y - 60,
+      `🎉 Nowy poziom: ${levelNames[newLevel]}!`, '#FFD600', 24);
+  }
+}
+
+export function nextMinigameRound(state: GameState): void {
+  if (!state.minigame) return;
+  const mg = state.minigame;
+  if (mg.round >= mg.maxRounds) {
+    // End minigame
+    state.minigame = null;
+    state.phase = 'playing';
+    return;
+  }
+  // Next round — pick new puzzle
+  const gameData = KINDERGARTEN_GAMES[mg.type as keyof typeof KINDERGARTEN_GAMES];
+  if (!gameData) { state.minigame = null; state.phase = 'playing'; return; }
+  const puzzleIdx = Math.floor(Math.random() * gameData.puzzles.length);
+  const puzzle = gameData.puzzles[puzzleIdx];
+  mg.round++;
+  mg.question = puzzle.question;
+  mg.options = puzzle.options.map((label: string) => ({ label }));
+  mg.correctIndex = puzzle.correct;
+  mg.selectedIndex = -1;
+  mg.answered = false;
+  mg.correct = false;
 }

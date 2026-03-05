@@ -70,6 +70,9 @@ export interface Player {
   jumpBufferTimer: number; // frames left of buffered jump input
   wasOnGround: boolean; // previous frame ground state (for landing detection)
   prevVy: number;       // previous frame vy (for landing impact)
+  // Facial expressions
+  emotion: 'neutral' | 'happy' | 'surprised' | 'tired' | 'excited';
+  emotionTimer: number; // auto-reset to neutral
 }
 
 export interface NPC {
@@ -94,6 +97,9 @@ export interface NPC {
   patrolSpeed?: number;
   visible: boolean;
   animTimer: number;
+  // Idle animation
+  idlePhase: number;    // phase for breathing/movement cycle
+  blinkTimer: number;   // blink countdown
 }
 
 // ---- World ----
@@ -128,7 +134,7 @@ export interface Room {
   bgColor: string;
   floorColor: string;
   icon: string;
-  bgImageUrl: string | null;
+  bgImageUrl?: string | null;
 }
 
 export interface Door {
@@ -140,7 +146,7 @@ export interface Door {
 }
 
 // ---- Interactive Objects ----
-export type InteractiveType = 'tv' | 'fridge' | 'lamp' | 'tap' | 'piano' | 'bookshelf' | 'rc_controller';
+export type InteractiveType = 'tv' | 'fridge' | 'lamp' | 'tap' | 'piano' | 'bookshelf' | 'rc_controller' | 'projector' | 'paczkomat';
 
 export interface InteractiveObject {
   id: string;
@@ -168,8 +174,17 @@ export type ItemType =
   | 'toothbrush' | 'soap' | 'towel' | 'comb' | 'pajama' | 'rubber_duck' | 'shampoo'
   // Baby / pregnancy items
   | 'baby_toy' | 'baby_bottle' | 'baby_blanket'
+  // Siostrzyczka quest items
+  | 'baby_name_card' | 'hospital_item' | 'baby_decor' | 'craft_supply' | 'balloon'
   // Wujek Rafał quest items
-  | 'pierogi' | 'ptasie_mleczko' | 'backpack';
+  | 'pierogi' | 'ptasie_mleczko' | 'backpack'
+  // Food / meal quest items
+  | 'coffee' | 'milk' | 'egg' | 'carrot' | 'cream' | 'flour'
+  | 'gofry' | 'soup' | 'bread' | 'cheese' | 'juice' | 'salad'
+  // Żabka / Paczkomat items
+  | 'chips' | 'candy' | 'water' | 'ice_cream' | 'parcel' | 'popcorn'
+  // Bonus artifacts (24 unique per-quest accessories)
+  | 'artifact';
 
 export interface CollectibleItem {
   id: string;
@@ -182,6 +197,7 @@ export interface CollectibleItem {
   questId: string;
   floatPhase: number;
   label?: string; // optional label for LEGO color etc.
+  fadeIn?: number; // 0→1 fade-in timer when quest activates
 }
 
 // ---- Quests ----
@@ -189,12 +205,14 @@ export interface Quest {
   id: string;
   title: string;
   npcId: string;
+  category: QuestCategory;
   steps: QuestStep[];
   currentStep: number;
   completed: boolean;
   active: boolean;
   reward: number;          // stars
   costumeReward?: string;  // costume item ID unlocked on completion
+  season?: SeasonType;     // if set, quest only appears in this season
 }
 
 export interface QuestStep {
@@ -289,6 +307,29 @@ export interface Climbable {
   emoji: string;    // icon
 }
 
+// ---- Vehicles (bikes, scooter, rollerblades) ----
+export type VehicleType = 'scooter' | 'rollerblades' | 'bike_kid' | 'bike_bmx' | 'bike_mountain' | 'bike_road';
+export type TrickState = 'none' | 'bunnyHop' | 'wheelie' | 'manual' | 'grind' | 'backflip' | 'stoppie' | 'airSpin' | 'kickflip' | 'slide';
+
+export interface Vehicle {
+  id: string;
+  type: VehicleType;
+  x: number;
+  y: number;
+  parkX: number;          // original spawn/parking position
+  parkY: number;
+  vx: number;
+  dir: 1 | -1;
+  active: boolean;        // Kuba is riding this vehicle
+  trickState: TrickState;
+  trickTimer: number;
+  trickScore: number;
+  comboCount: number;
+  comboTimer: number;
+  wheelieAngle: number;
+  airRotation: number;
+}
+
 // ---- RC Car ----
 export interface RCCar {
   x: number;
@@ -305,7 +346,12 @@ export interface RCCar {
 export type GamePhase =
   | 'start' | 'playing' | 'dialog' | 'math'
   | 'celebration' | 'level_complete'
-  | 'wardrobe' | 'achievements';
+  | 'wardrobe' | 'achievements' | 'quest_select';
+
+export type QuestCategory = 'codzienne' | 'przygody' | 'higiena' | 'specjalne' | 'posilki';
+
+// ---- Seasons ----
+export type SeasonType = 'wiosna' | 'lato' | 'jesien' | 'zima';
 
 // ---- Full Game State ----
 export interface GameState {
@@ -360,11 +406,51 @@ export interface GameState {
   climbables: Climbable[];
   // RC Car
   rcCar: RCCar | null;
+  // Vehicles
+  vehicles: Vehicle[];
+  activeVehicle: Vehicle | null;
   // Game juice
   freezeTimer: number; // hitstop: pause game logic while rendering
   // Street traffic
   streetCars: StreetCar[];
   streetCarTimer: number;
+  // Parallax clouds
+  parallaxClouds: ParallaxCloud[];
+  // Day/night cycle
+  dayTime: number; // 0-1 (0=sunrise, 0.25=noon, 0.5=sunset, 0.75=midnight)
+  // Franek companion
+  companionFranek: CompanionState | null;
+  // Screen transition
+  screenTransition: { type: 'fade' | 'zoom'; progress: number; active: boolean };
+  // Seasons
+  season: SeasonType;
+  // Bike races
+  bikeRace: BikeRace | null;
+}
+
+// ---- Bike Race ----
+export type RaceType = 'sprint' | 'timeAttack' | 'trickChallenge';
+
+export interface BikeRace {
+  type: RaceType;
+  name: string;
+  startX: number;
+  endX: number;
+  opponentId: string;        // NPC character ID
+  opponentX: number;
+  opponentSpeed: number;
+  opponentDir: 1 | -1;
+  timer: number;             // elapsed time
+  timeLimit: number;         // for timeAttack (0 = no limit)
+  countdown: number;         // 3..2..1..GO!
+  finished: boolean;
+  won: boolean;
+  bestTime: number;          // personal best
+  trickTarget: number;       // for trickChallenge
+  tricksCurrent: number;     // current trick score in race
+  arcadeOverlay: boolean;    // speed lines + arcade graphics
+  checkpoints: number[];     // X positions of checkpoints
+  checkpointsPassed: number;
 }
 
 // ---- Street Traffic ----
@@ -389,6 +475,31 @@ export interface Airplane {
   trailLength: number;
 }
 
+// ---- Parallax Cloud ----
+export interface ParallaxCloud {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  speed: number;  // parallax speed multiplier
+  opacity: number;
+  layer: number;  // 0=far, 1=mid, 2=near
+}
+
+// ---- Franek Companion ----
+export interface CompanionState {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  dir: 1 | -1;
+  onGround: boolean;
+  tailWag: number;   // tail wag phase
+  emotion: 'happy' | 'excited' | 'sleeping' | 'alert';
+  followDelay: number; // position buffer for delayed following
+  posHistory: Vec2[];   // position history for smooth follow
+}
+
 // ---- Level Definition ----
 export interface LevelData {
   worldWidth: number;
@@ -400,7 +511,7 @@ export interface LevelData {
   stairs: Stairs[];
   doors: Door[];
   interactiveObjects: Omit<InteractiveObject, 'cooldown'>[];
-  npcs: Omit<NPC, 'photoUrl'>[];
+  npcs: Omit<NPC, 'photoUrl' | 'idlePhase' | 'blinkTimer'>[];
   items: Omit<CollectibleItem, 'collected' | 'floatPhase'>[];
   quests: Quest[];
   costumes: CostumeItem[];

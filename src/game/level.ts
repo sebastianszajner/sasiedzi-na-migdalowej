@@ -3,8 +3,8 @@
 // EXPANDED: 8 quests, new NPCs, new items, math
 // ==========================================
 
-import type { LevelData, MathProblem, CostumeItem, Achievement } from './types';
-import { GARDEN } from './constants';
+import type { LevelData, MathProblem, CostumeItem, Achievement, QuestCategory, SeasonType, ItemType } from './types';
+import { GARDEN, HOUSE, ZABKA, PACZKOMAT, PRZEDSZKOLE, SZKOLA } from './constants';
 
 // Local constants for climbable references
 const GARDEN_TREE_X = GARDEN.treeX;      // 1100
@@ -225,6 +225,77 @@ export const MATH_PROBLEMS: MathProblem[] = [
     num1: 3, num2: 2, operation: '+', answer: 5,
     options: [4, 5, 6], hint: '🥟🥟🥟 + 🍫🍫 = ?', difficulty: 1,
   },
+  // --- MEAL QUEST MATH ---
+  // [29] Coffee quest — Tata needs coffee
+  {
+    visualIcon: '☕',
+    question: 'Tata pił 2 kawy rano.\nMama piła 1. Ile kaw razem?',
+    num1: 2, num2: 1, operation: '+', answer: 3,
+    options: [2, 3, 4], hint: '☕☕ + ☕ = ?', difficulty: 1,
+  },
+  // [30] Breakfast — gofry ingredients
+  {
+    visualIcon: '🧇',
+    question: 'Na gofry potrzeba 2 jajka i 1 mleko.\nIle składników?',
+    num1: 2, num2: 1, operation: '+', answer: 3,
+    options: [2, 3, 4], hint: '🥚🥚 + 🥛 = ?', difficulty: 1,
+  },
+  // [31] Lunch — soup + bread
+  {
+    visualIcon: '🍲',
+    question: 'Na stole 4 talerze zupy.\nKuba zjadł 1. Ile zostało?',
+    num1: 4, num2: 1, operation: '-', answer: 3,
+    options: [2, 3, 4], hint: '🍲🍲🍲🍲 - 🍲 = ?', difficulty: 1,
+  },
+  // [32] Dinner — sandwiches
+  {
+    visualIcon: '🍞',
+    question: 'Mama zrobiła 3 kanapki.\nTata dołożył 2. Ile jest?',
+    num1: 3, num2: 2, operation: '+', answer: 5,
+    options: [4, 5, 6], hint: '🍞🍞🍞 + 🍞🍞 = ?', difficulty: 1,
+  },
+  // [33] Żabka shopping
+  {
+    visualIcon: '🛒',
+    question: 'Kupiłeś 3 chipsy i 2 lody.\nIle produktów w torbie?',
+    num1: 3, num2: 2, operation: '+', answer: 5,
+    options: [4, 5, 6], hint: '🍿🍿🍿 + 🍦🍦 = ?', difficulty: 1,
+  },
+  // [34] Paczkomat
+  {
+    visualIcon: '📦',
+    question: 'W paczkomacie 6 paczek.\nOdebrałeś 2. Ile zostało?',
+    num1: 6, num2: 2, operation: '-', answer: 4,
+    options: [3, 4, 5], hint: '📦📦📦📦📦📦 - 📦📦 = ?', difficulty: 1,
+  },
+  // [35] Projector movie night
+  {
+    visualIcon: '🎬',
+    question: '4 osoby oglądają film.\nFranek też! Ile widzów?',
+    num1: 4, num2: 1, operation: '+', answer: 5,
+    options: [4, 5, 6], hint: '👨‍👩‍👦 + 🐕 + 👤 = ?', difficulty: 1,
+  },
+  // [36] Baby name - Zuzia letters
+  {
+    visualIcon: '📝',
+    question: 'Ile literek ma imię ZUZIA?',
+    num1: 5, num2: 0, operation: '+', answer: 5,
+    options: [4, 5, 6], hint: 'Z-U-Z-I-A → policz!', difficulty: 1,
+  },
+  // [37] Baby room - teddy bears
+  {
+    visualIcon: '🧸',
+    question: 'W pokoju dzidzi jest 2 misie.\nKuba dał jeszcze 1. Ile razem?',
+    num1: 2, num2: 1, operation: '+', answer: 3,
+    options: [2, 3, 4], hint: '🧸🧸 + 🧸 = ?', difficulty: 1,
+  },
+  // [38] Breathing exercise
+  {
+    visualIcon: '🎈',
+    question: 'Mama oddycha 3 razy.\nKuba 3 razy. Ile razem?',
+    num1: 3, num2: 3, operation: '+', answer: 6,
+    options: [5, 6, 7], hint: '🫁🫁🫁 + 🫁🫁🫁 = ?', difficulty: 1,
+  },
 ];
 
 // ---- Costumes (unlockable) ----
@@ -254,9 +325,15 @@ export const COSTUMES: CostumeItem[] = [
   { id: 'glasses_doctor', name: 'Okulary doktora', slot: 'glasses', emoji: '🩺', color: '#42A5F5', unlocked: false, unlockedBy: 'quest_hygiene_master' },
   { id: 'acc_stethoscope', name: 'Stetoskop', slot: 'accessory', emoji: '🩺', color: '#E53935', unlocked: false, unlockedBy: 'quest_wash_hands' },
   // Baby quest costume
-  { id: 'hat_baby', name: 'Czapeczka starszego brata', slot: 'hat', emoji: '👶', color: '#F48FB1', unlocked: false, unlockedBy: 'quest_baby' },
+  { id: 'hat_baby', name: 'Opaska starszego braciszka', slot: 'hat', emoji: '👶', color: '#F48FB1', unlocked: false, unlockedBy: 'quest_baby' },
   // Wujek Rafał quest costume
   { id: 'hat_vietnam', name: 'Nón lá (kapelusz wietnamski)', slot: 'hat', emoji: '🎋', color: '#C8AD8A', unlocked: false, unlockedBy: 'quest_rafal' },
+  // Meal quest costumes
+  { id: 'hat_chef_pro', name: 'Czapka szefa kuchni', slot: 'hat', emoji: '👨‍🍳', color: '#FFFDE7', unlocked: false, unlockedBy: 'quest_breakfast' },
+  { id: 'acc_apron', name: 'Fartuszek kucharza', slot: 'accessory', emoji: '🧑‍🍳', color: '#FF8A65', unlocked: false, unlockedBy: 'quest_dinner' },
+  // Żabka & Paczkomat
+  { id: 'hat_zabka', name: 'Czapka Żabki', slot: 'hat', emoji: '🐸', color: '#00A651', unlocked: false, unlockedBy: 'quest_zabka' },
+  { id: 'acc_popcorn', name: 'Kubek popcornu', slot: 'accessory', emoji: '🍿', color: '#FFD700', unlocked: false, unlockedBy: 'quest_movie_night' },
 ];
 
 // ---- Achievements ----
@@ -273,28 +350,85 @@ export const ACHIEVEMENTS: Achievement[] = [
 
 // ---- Level 1: "Przygody na Migdałowej" (8 quests!) ----
 export const LEVEL_1: LevelData = {
-  worldWidth: 3200,
+  worldWidth: 11000,
   worldHeight: 720,
   playerStart: { x: 480, y: 472 },
 
   rooms: [
+    // === ULICA ===
+    { name: 'Żabka', x: ZABKA.x, y: ZABKA.y, w: ZABKA.w, h: ZABKA.h, bgColor: '#F5F0EB', floorColor: '#D5CFC8', icon: '🐸', bgImageUrl: `${import.meta.env.BASE_URL}rooms/zabka.png` },
     // === PARTER ===
-    { name: 'Garaż', x: -200, y: 332, w: 280, h: 224, bgColor: '#D5D0CB', floorColor: '#A0A0A0', icon: '🚗', bgImageUrl: null },
-    { name: 'Kuchnia', x: 80, y: 332, w: 280, h: 224, bgColor: '#F5F0EB', floorColor: '#D5CFC8', icon: '🍳', bgImageUrl: null },
-    { name: 'Salon', x: 360, y: 332, w: 320, h: 224, bgColor: '#E8E0D8', floorColor: '#C8AD8A', icon: '🛋️', bgImageUrl: null },
-    { name: 'Przedpokój', x: 680, y: 332, w: 200, h: 224, bgColor: '#EDE8E3', floorColor: '#D5CFC8', icon: '🚪', bgImageUrl: null },
+    { name: 'Garaż', x: -200, y: 332, w: 200, h: 224, bgColor: '#E8E4E0', floorColor: '#8C8C8C', icon: '🚗', bgImageUrl: `${import.meta.env.BASE_URL}rooms/garaz.png` },
+    { name: 'Przedsionek', x: 0, y: 332, w: 80, h: 224, bgColor: '#F0EBE3', floorColor: '#B89B74', icon: '👟', bgImageUrl: `${import.meta.env.BASE_URL}rooms/przedsionek.png` },
+    { name: 'Kuchnia', x: 80, y: 332, w: 280, h: 224, bgColor: '#F2EDE6', floorColor: '#D5C8B5', icon: '🍳', bgImageUrl: `${import.meta.env.BASE_URL}rooms/kuchnia.png` },
+    { name: 'Salon', x: 360, y: 332, w: 320, h: 224, bgColor: '#EDE8E0', floorColor: '#A0886A', icon: '🛋️', bgImageUrl: `${import.meta.env.BASE_URL}rooms/salon.png` },
+    { name: 'Gabinet Taty', x: 680, y: 332, w: 200, h: 224, bgColor: '#EDE8E3', floorColor: '#D5CFC8', icon: '📚', bgImageUrl: `${import.meta.env.BASE_URL}rooms/gabinet_taty.png` },
     // === PIĘTRO ===
-    { name: 'Pokój Kuby', x: 80, y: 110, w: 300, h: 220, bgColor: '#DCEAF8', floorColor: '#C8AD8A', icon: '🧸', bgImageUrl: null },
-    { name: 'Hall', x: 380, y: 110, w: 180, h: 220, bgColor: '#E8E3DD', floorColor: '#C8AD8A', icon: '🏠', bgImageUrl: null },
-    { name: 'Łazienka', x: 560, y: 110, w: 160, h: 220, bgColor: '#E0F0F8', floorColor: '#CCE8E8', icon: '🚿', bgImageUrl: null },
-    { name: 'Sypialnia', x: 720, y: 110, w: 160, h: 220, bgColor: '#E8DAE8', floorColor: '#C8AD8A', icon: '🛏️', bgImageUrl: null },
+    { name: 'Pokój Kuby', x: 80, y: 110, w: 300, h: 220, bgColor: '#E3EDF5', floorColor: '#B89B74', icon: '🧸', bgImageUrl: `${import.meta.env.BASE_URL}rooms/pokoj_kuby.png` },
+    { name: 'Hall', x: 380, y: 110, w: 180, h: 220, bgColor: '#EDE8E0', floorColor: '#B89B74', icon: '🏠', bgImageUrl: `${import.meta.env.BASE_URL}rooms/hall.png` },
+    { name: 'Łazienka', x: 560, y: 110, w: 160, h: 220, bgColor: '#F0F0EC', floorColor: '#C5BFB5', icon: '🚿', bgImageUrl: `${import.meta.env.BASE_URL}rooms/lazienka.png` },
+    { name: 'Sypialnia', x: 720, y: 110, w: 160, h: 220, bgColor: '#EDE5E0', floorColor: '#A0886A', icon: '🛏️', bgImageUrl: `${import.meta.env.BASE_URL}rooms/sypialnia.png` },
+    // === ANTRESOLA (attic) ===
+    { name: 'Antresola', x: HOUSE.antresola.x, y: HOUSE.atticCeilingY, w: HOUSE.antresola.w, h: HOUSE.atticFloorY - HOUSE.atticCeilingY, bgColor: '#D8D0C8', floorColor: '#9E8E78', icon: '🏠', bgImageUrl: `${import.meta.env.BASE_URL}rooms/antresola.png` },
+
+    // === PRZEDSZKOLE — PARTER (y:332, h:224) ===
+    { name: 'Szatnia P', x: 3500, y: 332, w: 200, h: 224, bgColor: '#FFF8E1', floorColor: '#D5C8B5', icon: '👟', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_szatnia.png` },
+    { name: 'Sala Motylki', x: 3700, y: 332, w: 350, h: 224, bgColor: '#E8F5E9', floorColor: '#C8AD8A', icon: '🦋', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_sala_motylki.png` },
+    { name: 'Korytarz P', x: 4050, y: 332, w: 150, h: 224, bgColor: '#FFF8E1', floorColor: '#D5CFC8', icon: '🚪', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_korytarz.png` },
+    { name: 'Sala Biedronki', x: 4200, y: 332, w: 350, h: 224, bgColor: '#FFF3E0', floorColor: '#C8AD8A', icon: '🐞', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_sala_biedronki.png` },
+    { name: 'Kuchnia P', x: 4550, y: 332, w: 250, h: 224, bgColor: '#F5F0EB', floorColor: '#D5CFC8', icon: '🍳', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_kuchnia.png` },
+    { name: 'Jadalnia P', x: 4800, y: 332, w: 300, h: 224, bgColor: '#FFF8E1', floorColor: '#C8AD8A', icon: '🍽️', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_jadalnia.png` },
+    // === PRZEDSZKOLE — PIĘTRO (y:110, h:220) ===
+    { name: 'Gabinet Dyrektora P', x: 3500, y: 110, w: 250, h: 220, bgColor: '#EFEBE9', floorColor: '#B89B74', icon: '📋', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_gabinet_dyrektora.png` },
+    { name: 'Sala Zajęć', x: 3750, y: 110, w: 400, h: 220, bgColor: '#E3F2FD', floorColor: '#C8AD8A', icon: '🎨', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_sala_zajec.png` },
+    { name: 'Korytarz P Góra', x: 4150, y: 110, w: 150, h: 220, bgColor: '#FFF8E1', floorColor: '#D5CFC8', icon: '🚪', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_korytarz_gora.png` },
+    { name: 'Sala Słoniki', x: 4300, y: 110, w: 350, h: 220, bgColor: '#F3E5F5', floorColor: '#C8AD8A', icon: '🐘', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_sala_sloniki.png` },
+    { name: 'Łazienka P', x: 4650, y: 110, w: 200, h: 220, bgColor: '#E0F7FA', floorColor: '#C5BFB5', icon: '🚿', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_lazienka.png` },
+    { name: 'Pokój Nauczycielski P', x: 4850, y: 110, w: 250, h: 220, bgColor: '#EFEBE9', floorColor: '#B89B74', icon: '☕', bgImageUrl: `${import.meta.env.BASE_URL}rooms/p_pokoj_nauczycielski.png` },
+
+    // === SZKOŁA — PARTER (y:332, h:224) ===
+    { name: 'Hol Główny', x: 5500, y: 332, w: 300, h: 224, bgColor: '#ECEFF1', floorColor: '#B0BEC5', icon: '🏫', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_hol_glowny.png` },
+    { name: 'Klasa 1A', x: 5800, y: 332, w: 350, h: 224, bgColor: '#E8F5E9', floorColor: '#C8AD8A', icon: '📝', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_klasa_1a.png` },
+    { name: 'Korytarz S', x: 6150, y: 332, w: 150, h: 224, bgColor: '#ECEFF1', floorColor: '#B0BEC5', icon: '🚪', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_korytarz.png` },
+    { name: 'Klasa 2A', x: 6300, y: 332, w: 350, h: 224, bgColor: '#FFF3E0', floorColor: '#C8AD8A', icon: '📝', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_klasa_2a.png` },
+    { name: 'Świetlica', x: 6650, y: 332, w: 350, h: 224, bgColor: '#FFF8E1', floorColor: '#C8AD8A', icon: '🎮', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_swietlica.png` },
+    { name: 'Stołówka', x: 7000, y: 332, w: 400, h: 224, bgColor: '#F5F0EB', floorColor: '#D5CFC8', icon: '🍽️', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_stolowka.png` },
+    { name: 'Sala Gimnastyczna', x: 7400, y: 332, w: 400, h: 224, bgColor: '#E3F2FD', floorColor: '#BBDEFB', icon: '🏀', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_sala_gimnastyczna.png` },
+    // === SZKOŁA — PIĘTRO (y:110, h:220) ===
+    { name: 'Gabinet Dyrektora S', x: 5500, y: 110, w: 250, h: 220, bgColor: '#EFEBE9', floorColor: '#B89B74', icon: '📋', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_gabinet_dyrektora.png` },
+    { name: 'Klasa 3A', x: 5750, y: 110, w: 350, h: 220, bgColor: '#E8F5E9', floorColor: '#C8AD8A', icon: '📝', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_klasa_3a.png` },
+    { name: 'Korytarz S Góra', x: 6100, y: 110, w: 150, h: 220, bgColor: '#ECEFF1', floorColor: '#B0BEC5', icon: '🚪', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_korytarz_gora.png` },
+    { name: 'Klasa 4A', x: 6250, y: 110, w: 350, h: 220, bgColor: '#FFF3E0', floorColor: '#C8AD8A', icon: '📝', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_klasa_4a.png` },
+    { name: 'Biblioteka', x: 6600, y: 110, w: 400, h: 220, bgColor: '#EFEBE9', floorColor: '#B89B74', icon: '📚', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_biblioteka.png` },
+    { name: 'Sala Komputerowa', x: 7000, y: 110, w: 350, h: 220, bgColor: '#E0F2F1', floorColor: '#B0BEC5', icon: '💻', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_sala_komputerowa.png` },
+    { name: 'Pokój Nauczycielski S', x: 7350, y: 110, w: 250, h: 220, bgColor: '#EFEBE9', floorColor: '#B89B74', icon: '☕', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_pokoj_nauczycielski.png` },
+    { name: 'Łazienka S', x: 7600, y: 110, w: 200, h: 220, bgColor: '#E0F7FA', floorColor: '#C5BFB5', icon: '🚿', bgImageUrl: `${import.meta.env.BASE_URL}rooms/s_lazienka.png` },
+    // === BIBLIOTEKA MIEJSKA (x:-6400, w:600) ===
+    // Parter
+    { name: 'Hol Biblioteki', x: -6400, y: 332, w: 150, h: 224, bgColor: '#F5F0E8', floorColor: '#D2B48C', icon: '🏛️', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_hol.png` },
+    { name: 'Wypożyczalnia', x: -6250, y: 332, w: 150, h: 224, bgColor: '#FFF8E1', floorColor: '#D2B48C', icon: '📚', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_wypozyczalnia.png` },
+    { name: 'Czytelnia', x: -6100, y: 332, w: 150, h: 224, bgColor: '#EFEBE9', floorColor: '#C9A875', icon: '📖', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_czytelnia.png` },
+    { name: 'Sala Bajek', x: -5950, y: 332, w: 150, h: 224, bgColor: '#E8F5E9', floorColor: '#C9A875', icon: '🧚', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_sala_bajek.png` },
+    // Piętro
+    { name: 'Magazyn', x: -6400, y: 110, w: 150, h: 220, bgColor: '#ECEFF1', floorColor: '#B0BEC5', icon: '📦', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_magazyn.png` },
+    { name: 'Sala Multimedialna', x: -6250, y: 110, w: 150, h: 220, bgColor: '#E3F2FD', floorColor: '#B0BEC5', icon: '🎬', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_sala_multimedialna.png` },
+    { name: 'Biuro Biblioteki', x: -6100, y: 110, w: 150, h: 220, bgColor: '#FFF3E0', floorColor: '#C4A265', icon: '🖥️', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_biuro.png` },
+    { name: 'Archiwum', x: -5950, y: 110, w: 150, h: 220, bgColor: '#F3E5F5', floorColor: '#B0BEC5', icon: '🗂️', bgImageUrl: `${import.meta.env.BASE_URL}rooms/b_archiwum.png` },
+    // === OSIEDLE (x:9500, w:1500, 3 blocks simplified) ===
+    { name: 'Sklep Osiedlowy', x: 9500, y: 380, w: 200, h: 176, bgColor: '#FFF8E1', floorColor: '#D5CFC8', icon: '🏪', bgImageUrl: `${import.meta.env.BASE_URL}rooms/o_sklep.png` },
+    { name: 'Pralnia', x: 9700, y: 380, w: 150, h: 176, bgColor: '#E3F2FD', floorColor: '#C5D0D8', icon: '👕', bgImageUrl: `${import.meta.env.BASE_URL}rooms/o_pralnia.png` },
+    { name: 'Świetlica Osiedlowa', x: 9850, y: 380, w: 150, h: 176, bgColor: '#FFF3E0', floorColor: '#D2B48C', icon: '🎲', bgImageUrl: `${import.meta.env.BASE_URL}rooms/o_swietlica.png` },
+    { name: 'Mieszkanie Blok 2', x: 10000, y: 380, w: 250, h: 176, bgColor: '#ECEFF1', floorColor: '#C5BFB5', icon: '🏠', bgImageUrl: `${import.meta.env.BASE_URL}rooms/o_mieszkanie_2.png` },
+    { name: 'Mieszkanie Blok 3', x: 10500, y: 380, w: 250, h: 176, bgColor: '#E8EAF6', floorColor: '#C5BFB5', icon: '🏠', bgImageUrl: `${import.meta.env.BASE_URL}rooms/o_mieszkanie_3.png` },
   ],
 
   platforms: [
-    { x: -600, y: 556, w: 3900, h: 200 },   // ground (extended left for street + right for construction)
+    { x: -7300, y: 556, w: 18400, h: 200 },   // ground (full map: playground → osiedle, -7300 to 11100)
+    { x: ZABKA.x, y: 556, w: ZABKA.w, h: 12 }, // Żabka floor
     { x: -200, y: 556, w: 280, h: 12 },      // garage floor
     { x: 80, y: 556, w: 800, h: 12 },        // floor 1
     { x: 80, y: 330, w: 800, h: 12 },        // floor 2
+    { x: HOUSE.antresola.x, y: HOUSE.atticFloorY, w: HOUSE.antresola.w, h: 12 }, // attic floor
     { x: 0, y: 556, w: 80, h: 12 },          // taras
     // Garden platforms (sandbox rim, playhouse platform)
     { x: 990, y: 546, w: 60, h: 10 },        // sandbox edge
@@ -314,12 +448,48 @@ export const LEVEL_1: LevelData = {
     { x: 2480, y: 94, w: 40, h: 6 },         // crane step 7
     // Crane jib (horizontal arm at top)
     { x: 2300, y: 76, w: 400, h: 8 },        // crane jib walkway
+    // === SKATE PARK platforms ===
+    { x: -4400, y: 420, w: 120, h: 8 },          // halfpipe left edge
+    { x: -3720, y: 420, w: 120, h: 8 },          // halfpipe right edge
+    { x: -4100, y: 460, w: 80, h: 8 },           // quarter pipe lip
+    { x: -3900, y: 510, w: 200, h: 6 },          // grind rail
+    // === BASKETBALL hoop platforms ===
+    { x: -3350, y: 430, w: 40, h: 8 },           // left hoop backboard
+    { x: -2650, y: 430, w: 40, h: 8 },           // right hoop backboard
+    // === PRZEDSZKOLE floors ===
+    { x: PRZEDSZKOLE.x, y: 556, w: PRZEDSZKOLE.w, h: 12 },  // Przedszkole floor 1
+    { x: PRZEDSZKOLE.x, y: 330, w: PRZEDSZKOLE.w, h: 12 },  // Przedszkole floor 2
+    // === SZKOŁA floors ===
+    { x: SZKOLA.x, y: 556, w: SZKOLA.w, h: 12 },  // Szkoła floor 1
+    { x: SZKOLA.x, y: 330, w: SZKOLA.w, h: 12 },  // Szkoła floor 2
+    // === BIBLIOTEKA floors ===
+    { x: -6400, y: 556, w: 600, h: 12 },  // Biblioteka floor 1
+    { x: -6400, y: 330, w: 600, h: 12 },  // Biblioteka floor 2
+    // === BMX PUMP TRACK platforms ===
+    { x: -2220, y: 520, w: 50, h: 6 },   // small ramp lip
+    { x: -2080, y: 500, w: 40, h: 6 },   // kicker lip
+    { x: -1830, y: 530, w: 30, h: 6 },   // dirt jump 1
+    { x: -1790, y: 520, w: 30, h: 6 },   // dirt jump 2
+    { x: -1750, y: 530, w: 30, h: 6 },   // dirt jump 3
+    // === PLAC ZABAW platforms (climbing) ===
+    { x: -7000, y: 490, w: 60, h: 8 },   // climbing level 1
+    { x: -6950, y: 420, w: 60, h: 8 },   // climbing level 2
+    { x: -6900, y: 350, w: 60, h: 8 },   // climbing level 3
+    { x: -6600, y: 530, w: 40, h: 8 },   // trampoline platform (bounce handled in engine)
+    // === OSIEDLE floors ===
+    { x: 9500, y: 556, w: 1500, h: 12 },  // Osiedle ground floor
+    { x: 9500, y: 380, w: 1500, h: 12 },  // Osiedle floor 2
   ],
 
   walls: [
-    { x: -204, y: 332, w: 8, h: 224 },          // garage left wall
-    { x: 76, y: 110, w: 8, h: 310 },            // left house wall (gap at y:420..556 for garage passage)
-    { x: 876, y: 110, w: 8, h: 310 },           // right house wall — upper part (above door)
+    // Żabka walls
+    { x: ZABKA.x - 4, y: ZABKA.y, w: 8, h: ZABKA.h },  // Żabka left wall
+    { x: ZABKA.x + ZABKA.w - 4, y: ZABKA.y, w: 8, h: ZABKA.h }, // Żabka right wall
+    // House
+    { x: -204, y: 332, w: 8, h: 88 },           // garage left wall (332-420), gap 420-556 = ground-level garage door
+    { x: 76, y: HOUSE.atticCeilingY, w: 8, h: 332 - HOUSE.atticCeilingY }, // left house wall upper (attic to 1st floor)
+    { x: 76, y: 332, w: 8, h: 88 },            // left house wall lower (332-420), gap 420-556 = ground-level doorway vestibule→kitchen
+    { x: 876, y: HOUSE.atticCeilingY, w: 8, h: 310 + (110 - HOUSE.atticCeilingY) }, // right house wall — extended up for attic
     // Gap at y:420..556 for door to garden (136px gap for 84px tall player)
     { x: 356, y: 332, w: 8, h: 120 },           // kitchen-salon divider (partial)
     { x: 676, y: 332, w: 8, h: 120 },           // salon-hallway divider (partial, gap at bottom for passage)
@@ -330,24 +500,92 @@ export const LEVEL_1: LevelData = {
     // Fence is visual only — no collision walls (player walks through gap freely)
     // The gap (WEJŚCIE sign) is at x:1508-1588 in the renderer
     // Fence is decorative — construction site is open
-    // Right world boundary
-    { x: 3190, y: 0, w: 10, h: 556 },            // right world boundary
+    // === PRZEDSZKOLE walls ===
+    { x: 3496, y: 110, w: 8, h: 310 },             // Przedszkole left outer wall upper (110-420), gap 420-556 = entry
+    { x: 5096, y: 110, w: 8, h: 446 },             // Przedszkole right outer wall (solid)
+    // Parter dividers (y:332, h:120 — gap at bottom 452-556 for passage)
+    { x: 3696, y: 332, w: 8, h: 120 },             // Szatnia / Sala Motylki
+    { x: 4046, y: 332, w: 8, h: 120 },             // Sala Motylki / Korytarz
+    { x: 4196, y: 332, w: 8, h: 120 },             // Korytarz / Sala Biedronki
+    { x: 4546, y: 332, w: 8, h: 120 },             // Sala Biedronki / Kuchnia
+    { x: 4796, y: 332, w: 8, h: 120 },             // Kuchnia / Jadalnia
+    // Piętro dividers (y:110, h:120 — gap at bottom 230-330 for passage)
+    { x: 3746, y: 110, w: 8, h: 120 },             // Gabinet / Sala Zajęć
+    { x: 4146, y: 110, w: 8, h: 120 },             // Sala Zajęć / Korytarz Góra
+    { x: 4296, y: 110, w: 8, h: 120 },             // Korytarz Góra / Sala Słoniki
+    { x: 4646, y: 110, w: 8, h: 120 },             // Sala Słoniki / Łazienka P
+    { x: 4846, y: 110, w: 8, h: 120 },             // Łazienka P / Pokój Nauczycielski
+    // === SZKOŁA walls ===
+    { x: 5496, y: 110, w: 8, h: 310 },             // Szkoła left outer wall upper (110-420), gap 420-556 = entry
+    { x: 7796, y: 110, w: 8, h: 446 },             // Szkoła right outer wall (solid)
+    // Parter dividers (y:332, h:120)
+    { x: 5796, y: 332, w: 8, h: 120 },             // Hol / Klasa 1A
+    { x: 6146, y: 332, w: 8, h: 120 },             // Klasa 1A / Korytarz S
+    { x: 6296, y: 332, w: 8, h: 120 },             // Korytarz S / Klasa 2A
+    { x: 6646, y: 332, w: 8, h: 120 },             // Klasa 2A / Świetlica
+    { x: 6996, y: 332, w: 8, h: 120 },             // Świetlica / Stołówka
+    { x: 7396, y: 332, w: 8, h: 120 },             // Stołówka / Sala Gimnastyczna
+    // Piętro dividers (y:110, h:120)
+    { x: 5746, y: 110, w: 8, h: 120 },             // Gabinet S / Klasa 3A
+    { x: 6096, y: 110, w: 8, h: 120 },             // Klasa 3A / Korytarz S Góra
+    { x: 6246, y: 110, w: 8, h: 120 },             // Korytarz S / Klasa 4A
+    { x: 6596, y: 110, w: 8, h: 120 },             // Klasa 4A / Biblioteka
+    { x: 6996, y: 110, w: 8, h: 120 },             // Biblioteka / Sala Komputerowa
+    { x: 7346, y: 110, w: 8, h: 120 },             // Sala Komputerowa / Pokój Nauczycielski S
+    { x: 7596, y: 110, w: 8, h: 120 },             // Pokój Nauczycielski S / Łazienka S
+    // === BIBLIOTEKA walls ===
+    { x: -6404, y: 110, w: 8, h: 310 },             // Biblioteka left outer wall upper (gap 420-556 = entry)
+    { x: -5804, y: 110, w: 8, h: 446 },             // Biblioteka right outer wall (solid)
+    // Parter dividers
+    { x: -6254, y: 332, w: 8, h: 120 },             // Hol / Wypożyczalnia
+    { x: -6104, y: 332, w: 8, h: 120 },             // Wypożyczalnia / Czytelnia
+    { x: -5954, y: 332, w: 8, h: 120 },             // Czytelnia / Sala Bajek
+    // Piętro dividers
+    { x: -6254, y: 110, w: 8, h: 120 },             // Magazyn / Sala Multimedialna
+    { x: -6104, y: 110, w: 8, h: 120 },             // Sala Multimedialna / Biuro
+    { x: -5954, y: 110, w: 8, h: 120 },             // Biuro / Archiwum
+    // === OSIEDLE walls (3 simplified blocks) ===
+    { x: 9496, y: 210, w: 8, h: 346 },              // Osiedle block 1 left wall
+    { x: 9996, y: 210, w: 8, h: 346 },              // Block 1 right / Block 2 left
+    { x: 10496, y: 210, w: 8, h: 346 },             // Block 2 right / Block 3 left
+    { x: 10996, y: 210, w: 8, h: 346 },             // Block 3 right wall
+    // World boundaries
+    { x: -7290, y: 0, w: 10, h: 556 },              // left world boundary (playground)
+    { x: 10990, y: 0, w: 10, h: 556 },              // right world boundary (osiedle)
   ],
 
   stairs: [
     { x: 720, y: 332, w: 56, topY: 330, bottomY: 556 },
+    // Ladder to antresola (from Kuba's room / hall area)
+    { x: 350, y: HOUSE.atticFloorY, w: 30, topY: HOUSE.atticFloorY, bottomY: 330 },
+    // Przedszkole stairs (korytarz area)
+    { x: 4070, y: 332, w: 56, topY: 330, bottomY: 556 },
+    // Szkoła stairs (korytarz area)
+    { x: 6170, y: 332, w: 56, topY: 330, bottomY: 556 },
+    // Biblioteka stairs (hol area)
+    { x: -6350, y: 332, w: 56, topY: 330, bottomY: 556 },
+    // Osiedle stairs (block 1)
+    { x: 9750, y: 380, w: 56, topY: 378, bottomY: 556 },
   ],
 
   doors: [
     { x: 870, y: 440, w: 20, h: 116, label: 'Wyjście →' },
+    { x: 3500, y: 440, w: 20, h: 116, label: 'Przedszkole →' },
+    { x: 5500, y: 440, w: 20, h: 116, label: 'Szkoła →' },
   ],
 
   interactiveObjects: [
-    // TV in salon — can be turned on/off
+    // Projector in salon — replaces TV (mounted on ceiling, projects onto pull-down screen)
     {
-      id: 'tv_salon', type: 'tv' as const,
-      x: 440, y: 420, w: 60, h: 40,
-      state: false, room: 'salon', label: 'Telewizor', emoji: '📺',
+      id: 'projector_salon', type: 'projector' as const,
+      x: 440, y: 345, w: 50, h: 20,
+      state: false, room: 'salon', label: 'Projektor', emoji: '📽️',
+    },
+    // Paczkomat (InPost parcel locker on the street)
+    {
+      id: 'paczkomat_street', type: 'paczkomat' as const,
+      x: PACZKOMAT.x, y: PACZKOMAT.y, w: PACZKOMAT.w, h: PACZKOMAT.h,
+      state: false, room: 'street', label: 'Paczkomat', emoji: '📦',
     },
     // Fridge in kitchen — can be opened/closed
     {
@@ -412,10 +650,11 @@ export const LEVEL_1: LevelData = {
     },
     // Listonosz Pan Marek - appears at door (ground floor: y = 556 - 84 = 472)
     {
-      id: 'listonosz', name: 'Pan Marek', x: 860, y: 472, w: 52, h: 84, dir: -1,
+      id: 'listonosz', name: 'Pan Marek', x: -500, y: 472, w: 52, h: 84, dir: 1,
       color: '#1565C0', hairColor: '#5D4037', hairLong: false,
       dialogLines: [], questId: 'quest_mailman', interactRadius: 90, emote: '📬',
-      behavior: 'static', visible: false, animTimer: 0,
+      behavior: 'patrol', patrolMinX: -500, patrolMaxX: 860, patrolSpeed: 1.8,
+      visible: false, animTimer: 0,
     },
     // Jurek (plush dog NPC: w:32, h:32, y = 556 - 32 = 524)
     {
@@ -468,12 +707,392 @@ export const LEVEL_1: LevelData = {
       dialogLines: [], questId: null, interactRadius: 90, emote: '👮',
       behavior: 'static', visible: false, animTimer: 0,
     },
-    // Wujek Rafał — wraca z Wietnamu, przyjeżdża taxi z lewej
+    // Wujek Rafał — wraca z Wietnamu, przyjeżdża czerwonym cabrio z lewej
     {
-      id: 'rafal', name: 'Wujek Rafał', x: -500, y: 472, w: 52, h: 84, dir: 1,
+      id: 'rafal', name: 'Wujek Rafał', x: -700, y: 472, w: 52, h: 84, dir: 1,
       color: '#2E7D32', hairColor: '#5D4037', hairLong: false,
       dialogLines: [], questId: 'quest_rafal', interactRadius: 90, emote: '🎒',
       behavior: 'static', visible: false, animTimer: 0,
+    },
+    // Żabka shop clerk — Pani Kasia
+    {
+      id: 'zabka_clerk', name: 'Pani Kasia', x: ZABKA.x + 80, y: 472, w: 52, h: 84, dir: 1,
+      color: '#00A651', hairColor: '#795548', hairLong: true,
+      dialogLines: [], questId: 'quest_zabka', interactRadius: 90, emote: '🐸',
+      behavior: 'static', visible: false, animTimer: 0,
+    },
+
+    // === PRZEDSZKOLE NPC (8) ===
+    // Nauczyciele (w:52, h:84, parter y=472, piętro y=246)
+    {
+      id: 'pani_ania', name: 'Pani Ania', x: 3720, y: 472, w: 52, h: 84, dir: 1,
+      color: '#E91E63', hairColor: '#5D4037', hairLong: true,
+      dialogLines: ['Cześć! Chcesz malować z nami? 🎨', 'Motylki dziś robią kolaż!'],
+      questId: null, interactRadius: 90, emote: '🎨',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'pani_zosia', name: 'Pani Zosia', x: 4250, y: 472, w: 52, h: 84, dir: -1,
+      color: '#7B1FA2', hairColor: '#4E342E', hairLong: true,
+      dialogLines: ['A, B, C... kto tu przyszedł? 📖', 'Biedronki uczą się literek!'],
+      questId: null, interactRadius: 90, emote: '📖',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'pan_tomek_p', name: 'Pan Tomek', x: 3800, y: 246, w: 52, h: 84, dir: 1,
+      color: '#1565C0', hairColor: '#3E2723', hairLong: false,
+      dialogLines: ['Zaśpiewamy razem? 🎵', 'Dziś gramy na bębenku!'],
+      questId: null, interactRadius: 90, emote: '🎵',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'dyrektor_p', name: 'Pani Dyrektor', x: 3550, y: 246, w: 52, h: 84, dir: 1,
+      color: '#455A64', hairColor: '#795548', hairLong: true,
+      dialogLines: ['Witaj w naszym przedszkolu! 🏫', 'Mam nadzieję, że ci się tu podoba!'],
+      questId: null, interactRadius: 90, emote: '🏫',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'kucharka_p', name: 'Pani Marta', x: 4600, y: 472, w: 52, h: 84, dir: -1,
+      color: '#FFFFFF', hairColor: '#8D6E63', hairLong: false,
+      dialogLines: ['Dziś na obiad zupa pomidorowa! 🍅', 'Kto chce dokładkę?'],
+      questId: null, interactRadius: 90, emote: '🍳',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    // Dzieci (w:42, h:68, y = 556 - 68 = 488)
+    {
+      id: 'kasia_kid', name: 'Kasia', x: 3800, y: 488, w: 42, h: 68, dir: 1,
+      color: '#F48FB1', hairColor: '#FFD54F', hairLong: true,
+      dialogLines: ['Hej! Jestem Kasia! 😊', 'Lubisz rysować?'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 3700, patrolMaxX: 4000, patrolSpeed: 1.0,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'janek_kid', name: 'Janek', x: 4300, y: 488, w: 42, h: 68, dir: -1,
+      color: '#42A5F5', hairColor: '#5D4037', hairLong: false,
+      dialogLines: ['Cześć! Gram w klocki! 🧱', 'Chcesz zobaczyć moją wieżę?'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 4200, patrolMaxX: 4500, patrolSpeed: 1.0,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'ola_kid', name: 'Ola', x: 3900, y: 488, w: 42, h: 68, dir: 1,
+      color: '#CE93D8', hairColor: '#8D6E63', hairLong: true,
+      dialogLines: ['Cześć! Baw się z nami! 🎈', 'Słoniki to najlepsza grupa!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 3600, patrolMaxX: 4000, patrolSpeed: 0.9,
+      visible: true, animTimer: 0,
+    },
+
+    // === SZKOŁA NPC — NAUCZYCIELE (10) ===
+    {
+      id: 'dyrektor_s', name: 'Pan Dyrektor', x: 5550, y: 246, w: 52, h: 84, dir: 1,
+      color: '#37474F', hairColor: '#616161', hairLong: false,
+      dialogLines: ['Witaj w naszej szkole! 🏫', 'Nauka to przygoda!'],
+      questId: null, interactRadius: 90, emote: '🏫',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'pani_magda', name: 'Pani Magda', x: 5850, y: 472, w: 52, h: 84, dir: -1,
+      color: '#1B5E20', hairColor: '#4E342E', hairLong: true,
+      dialogLines: ['Ile to jest 7 + 5? 🧮', 'Matematyka jest wszędzie!'],
+      questId: null, interactRadius: 90, emote: '🧮',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'pan_marek_s', name: 'Pan Marek', x: 6350, y: 472, w: 52, h: 84, dir: 1,
+      color: '#33691E', hairColor: '#3E2723', hairLong: false,
+      dialogLines: ['Wiecie co jedzą żaby? 🐸', 'Przyroda jest fascynująca!'],
+      questId: null, interactRadius: 90, emote: '🌿',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'pani_krysia', name: 'Pani Krysia', x: 5800, y: 246, w: 52, h: 84, dir: 1,
+      color: '#880E4F', hairColor: '#5D4037', hairLong: true,
+      dialogLines: ['Kto przeczytał lekturę? 📚', 'Język polski jest piękny!'],
+      questId: null, interactRadius: 90, emote: '📖',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'pan_adam', name: 'Pan Adam', x: 6300, y: 246, w: 52, h: 84, dir: -1,
+      color: '#0D47A1', hairColor: '#424242', hairLong: false,
+      dialogLines: ['Kto pokaże Polskę na mapie? 🗺️', 'Dzisiaj lecimy do Afryki!'],
+      questId: null, interactRadius: 90, emote: '🗺️',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'pani_ewa', name: 'Pani Ewa', x: 7050, y: 246, w: 52, h: 84, dir: 1,
+      color: '#4A148C', hairColor: '#3E2723', hairLong: true,
+      dialogLines: ['Uruchamiamy komputery! 💻', 'Kto napisze swój pierwszy program?'],
+      questId: null, interactRadius: 90, emote: '💻',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'bibliotekarka', name: 'Pani Bibliotekarka', x: 6650, y: 246, w: 52, h: 84, dir: -1,
+      color: '#BF360C', hairColor: '#795548', hairLong: true,
+      dialogLines: ['Szukasz jakiejś książki? 📚', 'Mamy nowe komiksy!'],
+      questId: null, interactRadius: 90, emote: '📚',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'wf_teacher', name: 'Pan Wojtek', x: 7500, y: 472, w: 52, h: 84, dir: -1,
+      color: '#E65100', hairColor: '#5D4037', hairLong: false,
+      dialogLines: ['Rozgrzewka! 10 pajacyków! 🏃', 'Ruch to zdrowie!'],
+      questId: null, interactRadius: 90, emote: '🏀',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'wozny', name: 'Pan Staszek', x: 6000, y: 472, w: 52, h: 84, dir: 1,
+      color: '#546E7A', hairColor: '#9E9E9E', hairLong: false,
+      dialogLines: ['Nie biegać po korytarzu! 🔔', 'Przerwa za 5 minut!'],
+      questId: null, interactRadius: 90, emote: '🔔',
+      behavior: 'patrol', patrolMinX: 5500, patrolMaxX: 7800, patrolSpeed: 1.5,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'kucharka_s', name: 'Pani Halina', x: 7100, y: 472, w: 52, h: 84, dir: -1,
+      color: '#FFFFFF', hairColor: '#8D6E63', hairLong: false,
+      dialogLines: ['Dziś kotlet z ziemniakami! 🍽️', 'Kto chce kompot?'],
+      questId: null, interactRadius: 90, emote: '🍽️',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+
+    // === SZKOŁA NPC — UCZNIOWIE (10, w:42, h:68, y=488) ===
+    {
+      id: 'uczen_filip', name: 'Filip', x: 5900, y: 488, w: 42, h: 68, dir: 1,
+      color: '#2196F3', hairColor: '#5D4037', hairLong: false,
+      dialogLines: ['Hej! Jestem w 1A! 😄', 'Masz fajne buty!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 5800, patrolMaxX: 6100, patrolSpeed: 1.0,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_maja', name: 'Maja', x: 6400, y: 488, w: 42, h: 68, dir: -1,
+      color: '#F06292', hairColor: '#FFD54F', hairLong: true,
+      dialogLines: ['Lubię przyrodę! 🌱', 'Pan Marek jest super!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 6300, patrolMaxX: 6600, patrolSpeed: 1.0,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_bartek', name: 'Bartek', x: 5800, y: 262, w: 42, h: 68, dir: 1,
+      color: '#4CAF50', hairColor: '#3E2723', hairLong: false,
+      dialogLines: ['Czytasz komiksy? 📖', 'Pani Krysia dała nam wiersz!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 5750, patrolMaxX: 6050, patrolSpeed: 0.9,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_zuzia', name: 'Zuzia', x: 6300, y: 262, w: 42, h: 68, dir: -1,
+      color: '#AB47BC', hairColor: '#8D6E63', hairLong: true,
+      dialogLines: ['Wiesz gdzie jest Brazylia? 🌍', 'Geografia jest fajna!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 6250, patrolMaxX: 6550, patrolSpeed: 0.9,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_tomek', name: 'Tomek', x: 6700, y: 262, w: 42, h: 68, dir: 1,
+      color: '#FF7043', hairColor: '#5D4037', hairLong: false,
+      dialogLines: ['Czytam Harrego Pottera! 🧙', 'Biblioteka to moje miejsce!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 6600, patrolMaxX: 6950, patrolSpeed: 0.8,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_hania', name: 'Hania', x: 7050, y: 262, w: 42, h: 68, dir: -1,
+      color: '#EC407A', hairColor: '#4E342E', hairLong: true,
+      dialogLines: ['Piszę program w Scratchu! 💻', 'Lubię informatykę!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 7000, patrolMaxX: 7300, patrolSpeed: 0.9,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_kacper', name: 'Kacper', x: 7500, y: 488, w: 42, h: 68, dir: 1,
+      color: '#FF9800', hairColor: '#3E2723', hairLong: false,
+      dialogLines: ['Gram w kosza po lekcjach! 🏀', 'Pan Wojtek jest mega!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 7400, patrolMaxX: 7750, patrolSpeed: 1.1,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_lena', name: 'Lena', x: 6700, y: 488, w: 42, h: 68, dir: 1,
+      color: '#26C6DA', hairColor: '#795548', hairLong: true,
+      dialogLines: ['Gramy w gry planszowe! 🎲', 'Świetlica jest fajna!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 6650, patrolMaxX: 6950, patrolSpeed: 0.9,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_szymon', name: 'Szymon', x: 7900, y: 488, w: 42, h: 68, dir: -1,
+      color: '#66BB6A', hairColor: '#5D4037', hairLong: false,
+      dialogLines: ['Gramy w piłkę! ⚽', 'Boisko jest nasze po lekcjach!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 7800, patrolMaxX: 8400, patrolSpeed: 1.2,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'uczen_iga', name: 'Iga', x: 8100, y: 488, w: 42, h: 68, dir: 1,
+      color: '#EF5350', hairColor: '#FFD54F', hairLong: true,
+      dialogLines: ['Kto gra w berka? 🏃‍♀️', 'Lubię biegać!'],
+      questId: null, interactRadius: 60, emote: null,
+      behavior: 'patrol', patrolMinX: 7800, patrolMaxX: 8400, patrolSpeed: 1.1,
+      visible: true, animTimer: 0,
+    },
+
+    // === STREFY SPORTOWE (lewa strona) ===
+    {
+      id: 'skater', name: 'Dawid', x: -4200, y: 472, w: 52, h: 84, dir: 1,
+      color: '#212121', hairColor: '#FFD54F', hairLong: false,
+      dialogLines: ['Siema! Robię kickflipa! 🛹', 'Chcesz spróbować? Trzymaj deskę!'],
+      questId: null, interactRadius: 90, emote: '🛹',
+      behavior: 'patrol', patrolMinX: -4400, patrolMaxX: -3600, patrolSpeed: 2.0,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'trener_koszykowki', name: 'Pan Darek', x: -3100, y: 472, w: 52, h: 84, dir: -1,
+      color: '#E65100', hairColor: '#5D4037', hairLong: false,
+      dialogLines: ['Podaj piłkę i rzuć do kosza! 🏀', 'Trening czyni mistrza!'],
+      questId: null, interactRadius: 90, emote: '🏀',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'rowerzysta', name: 'Pani Magda R.', x: -2200, y: 472, w: 52, h: 84, dir: 1,
+      color: '#00897B', hairColor: '#4E342E', hairLong: true,
+      dialogLines: ['Cześć! Lubisz jeździć na rowerze? 🚴', 'Ta ścieżka jest super na wyścigi!'],
+      questId: null, interactRadius: 90, emote: '🚴',
+      behavior: 'patrol', patrolMinX: -2400, patrolMaxX: -1800, patrolSpeed: 2.2,
+      visible: true, animTimer: 0,
+    },
+    // === PARK MIEJSKI NPCs ===
+    {
+      id: 'spacerujacy', name: 'Pan Zenon', x: -5500, y: 472, w: 52, h: 84, dir: 1,
+      color: '#795548', hairColor: '#9E9E9E', hairLong: false,
+      dialogLines: ['Dobry dzień! 🌳', 'Ładna pogoda na spacer, co?', 'Fontanna jest piękna o zmierzchu!'],
+      questId: null, interactRadius: 90, emote: '🚶',
+      behavior: 'patrol', patrolMinX: -5700, patrolMaxX: -5100, patrolSpeed: 1.2,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'babcia_park', name: 'Pani Jadwiga', x: -5300, y: 472, w: 52, h: 84, dir: -1,
+      color: '#8D6E63', hairColor: '#BDBDBD', hairLong: true,
+      dialogLines: ['Ach, jak miło! 🌸', 'Karmię tu kaczki codziennie!', 'Masz cukierka? 🍬'],
+      questId: null, interactRadius: 90, emote: '🧶',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    // === BIBLIOTEKA NPCs ===
+    {
+      id: 'bibliotekarz_m', name: 'Pan Henryk', x: -6300, y: 472, w: 52, h: 84, dir: 1,
+      color: '#5D4037', hairColor: '#9E9E9E', hairLong: false,
+      dialogLines: ['Witaj w bibliotece! 📚', 'Polecam dział z bajkami!', 'Ciii... tutaj się nie krzyczy 🤫'],
+      questId: null, interactRadius: 90, emote: '📖',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'czytelniczka', name: 'Pani Wanda', x: -6050, y: 472, w: 52, h: 84, dir: -1,
+      color: '#7B1FA2', hairColor: '#5D4037', hairLong: true,
+      dialogLines: ['Czytam wspaniałą książkę! 📖', 'Znasz baśnie braci Grimm?'],
+      questId: null, interactRadius: 90, emote: '📕',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'dziecko_czytajace', name: 'Marysia', x: -5920, y: 488, w: 42, h: 68, dir: 1,
+      color: '#E91E63', hairColor: '#F9A825', hairLong: true,
+      dialogLines: ['Lubisz czytać? 📚', 'Czytam o smokach! 🐉', 'Ta biblioteka jest magiczna!'],
+      questId: null, interactRadius: 80, emote: '📖',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'wolontariusz', name: 'Kamil', x: -6200, y: 248, w: 52, h: 84, dir: -1,
+      color: '#1565C0', hairColor: '#3E2723', hairLong: false,
+      dialogLines: ['Hej! Pomagam tu jako wolontariusz! 🤝', 'Na górze mamy multimedia i archiwa!'],
+      questId: null, interactRadius: 90, emote: '🙋',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    // === PLAC ZABAW NPCs ===
+    {
+      id: 'opiekun_placu', name: 'Pan Robert', x: -7100, y: 472, w: 52, h: 84, dir: 1,
+      color: '#FF6F00', hairColor: '#4E342E', hairLong: false,
+      dialogLines: ['Witaj na placu zabaw! 🎡', 'Baw się bezpiecznie!', 'Karuzela jest super, co? 🎠'],
+      questId: null, interactRadius: 90, emote: '👷',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'dziecko_hustawka', name: 'Zosia', x: -6800, y: 488, w: 42, h: 68, dir: -1,
+      color: '#F06292', hairColor: '#FFB74D', hairLong: true,
+      dialogLines: ['Huśtam się! Weee! 🤸', 'Lubisz trampolinę? 🤩', 'Skacze się na niej super wysoko!'],
+      questId: null, interactRadius: 80, emote: '🤸',
+      behavior: 'patrol', patrolMinX: -6900, patrolMaxX: -6500, patrolSpeed: 1.5,
+      visible: true, animTimer: 0,
+    },
+    // === PARK ZA SZKOŁĄ NPC ===
+    {
+      id: 'ogrodnik', name: 'Pan Kazimierz', x: 8900, y: 472, w: 52, h: 84, dir: -1,
+      color: '#33691E', hairColor: '#9E9E9E', hairLong: false,
+      dialogLines: ['Piękne kwiaty, prawda? 🌺', 'Zajmuję się tym parkiem od 20 lat!', 'Uważaj na kaczki! 🦆'],
+      questId: null, interactRadius: 90, emote: '🌻',
+      behavior: 'patrol', patrolMinX: 8650, patrolMaxX: 9150, patrolSpeed: 1.0,
+      visible: true, animTimer: 0,
+    },
+    // === PRZYSTANEK NPCs ===
+    {
+      id: 'czekajacy_1', name: 'Pan Stanisław', x: 9250, y: 472, w: 52, h: 84, dir: 1,
+      color: '#455A64', hairColor: '#BDBDBD', hairLong: false,
+      dialogLines: ['Autobus powinien zaraz przyjechać... 🚌', 'Czekam tu od 15 minut!'],
+      questId: null, interactRadius: 90, emote: '🕐',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'czekajaca_2', name: 'Pani Teresa', x: 9350, y: 472, w: 52, h: 84, dir: -1,
+      color: '#AD1457', hairColor: '#5D4037', hairLong: true,
+      dialogLines: ['Jadę do centrum! 🏙️', 'Ten autobus zawsze się spóźnia...', 'Ładna pogoda!'],
+      questId: null, interactRadius: 90, emote: '👜',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    // === OSIEDLE NPCs ===
+    {
+      id: 'sasiad_blok1', name: 'Pan Ryszard', x: 9600, y: 472, w: 52, h: 84, dir: 1,
+      color: '#37474F', hairColor: '#78909C', hairLong: false,
+      dialogLines: ['Witaj sąsiedzie! 👋', 'Ładne osiedle, co?', 'Mamy tu super plac zabaw!'],
+      questId: null, interactRadius: 90, emote: '🏢',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'sasiada_blok2', name: 'Pani Grażyna', x: 10100, y: 472, w: 52, h: 84, dir: -1,
+      color: '#C62828', hairColor: '#8D6E63', hairLong: true,
+      dialogLines: ['Dzień dobry! 🌷', 'Robię najlepsze sernik na osiedlu!', 'Zapraszam na kawę! ☕'],
+      questId: null, interactRadius: 90, emote: '🎂',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'dziecko_osiedle1', name: 'Patryk', x: 9800, y: 488, w: 42, h: 68, dir: 1,
+      color: '#1976D2', hairColor: '#3E2723', hairLong: false,
+      dialogLines: ['Hej! Grasz w piłkę? ⚽', 'Umiem robić tricki na rowerze! 🚲'],
+      questId: null, interactRadius: 80, emote: '⚽',
+      behavior: 'patrol', patrolMinX: 9700, patrolMaxX: 10000, patrolSpeed: 1.8,
+      visible: true, animTimer: 0,
+    },
+    {
+      id: 'dziecko_osiedle2', name: 'Weronika', x: 10300, y: 488, w: 42, h: 68, dir: -1,
+      color: '#E040FB', hairColor: '#F9A825', hairLong: true,
+      dialogLines: ['Cześć! 🌈', 'Rysuję kredą na chodniku!', 'Lubisz rolki? Ja mam różowe! 🛼'],
+      questId: null, interactRadius: 80, emote: '🎨',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'sklepikarz', name: 'Pan Zbigniew', x: 9550, y: 296, w: 52, h: 84, dir: 1,
+      color: '#4E342E', hairColor: '#616161', hairLong: false,
+      dialogLines: ['Witam w sklepiku! 🛒', 'Mam najlepsze bułki w okolicy!', 'Coś do picia? 🥤'],
+      questId: null, interactRadius: 90, emote: '🛒',
+      behavior: 'static', visible: true, animTimer: 0,
+    },
+    {
+      id: 'emeryt', name: 'Pan Władysław', x: 10600, y: 472, w: 52, h: 84, dir: -1,
+      color: '#3E2723', hairColor: '#E0E0E0', hairLong: false,
+      dialogLines: ['Za moich czasów... 👴', 'Kiedyś tu było pole! Teraz bloki!', 'Mam 82 lata i ciągle chodzę! 💪'],
+      questId: null, interactRadius: 90, emote: '🎩',
+      behavior: 'patrol', patrolMinX: 10400, patrolMaxX: 10800, patrolSpeed: 0.8,
+      visible: true, animTimer: 0,
     },
   ],
 
@@ -614,21 +1233,246 @@ export const LEVEL_1: LevelData = {
     { id: 'baby3', type: 'baby_blanket', x: 750, y: 285, w: 26, h: 26, questId: 'quest_baby' },
     { id: 'baby4', type: 'baby_toy', x: 200, y: 285, w: 26, h: 26, questId: 'quest_baby' },
 
+    // ---- Quest: Imię dla siostrzyczki (name cards in house) ----
+    { id: 'bname1', type: 'baby_name_card', x: 600, y: 285, w: 24, h: 24, questId: 'quest_baby_name' },
+    { id: 'bname2', type: 'baby_name_card', x: 300, y: 525, w: 24, h: 24, questId: 'quest_baby_name' },
+    { id: 'bname3', type: 'baby_name_card', x: 130, y: 285, w: 24, h: 24, questId: 'quest_baby_name' },
+
+    // ---- Quest: Torba do szpitala (hospital items scattered in rooms) ----
+    { id: 'hosp1', type: 'hospital_item', x: 680, y: 285, w: 24, h: 24, questId: 'quest_hospital_bag' },
+    { id: 'hosp2', type: 'hospital_item', x: 180, y: 525, w: 24, h: 24, questId: 'quest_hospital_bag' },
+    { id: 'hosp3', type: 'hospital_item', x: 450, y: 525, w: 24, h: 24, questId: 'quest_hospital_bag' },
+    { id: 'hosp4', type: 'hospital_item', x: 820, y: 285, w: 24, h: 24, questId: 'quest_hospital_bag' },
+
+    // ---- Quest: Pokój dla siostrzyczki (decorations in rooms) ----
+    { id: 'bdec1', type: 'baby_decor', x: 250, y: 285, w: 24, h: 24, questId: 'quest_baby_room' },
+    { id: 'bdec2', type: 'baby_decor', x: 650, y: 285, w: 24, h: 24, questId: 'quest_baby_room' },
+    { id: 'bdec3', type: 'baby_decor', x: 480, y: 525, w: 24, h: 24, questId: 'quest_baby_room' },
+
+    // ---- Quest: Prezent od Kuby (craft supplies in house) ----
+    { id: 'craft1', type: 'craft_supply', x: 140, y: 285, w: 24, h: 24, questId: 'quest_baby_gift' },
+    { id: 'craft2', type: 'craft_supply', x: 420, y: 285, w: 24, h: 24, questId: 'quest_baby_gift' },
+    { id: 'craft3', type: 'craft_supply', x: 700, y: 525, w: 24, h: 24, questId: 'quest_baby_gift' },
+
+    // ---- Quest: Oddychamy razem! (balloons scattered everywhere) ----
+    { id: 'ball1', type: 'balloon', x: 350, y: 525, w: 24, h: 24, questId: 'quest_breathing' },
+    { id: 'ball2', type: 'balloon', x: 550, y: 285, w: 24, h: 24, questId: 'quest_breathing' },
+    { id: 'ball3', type: 'balloon', x: 1050, y: 525, w: 24, h: 24, questId: 'quest_breathing' },
+
     // ---- Quest: Wujek Rafał — pierogi + ptasie mleczko (kuchnia + salon) ----
     { id: 'pierogi1', type: 'pierogi', x: 120, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
     { id: 'pierogi2', type: 'pierogi', x: 200, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
     { id: 'pierogi3', type: 'pierogi', x: 280, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
     { id: 'ptasie1', type: 'ptasie_mleczko', x: 420, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
     { id: 'ptasie2', type: 'ptasie_mleczko', x: 550, y: 525, w: 28, h: 28, questId: 'quest_rafal' },
+
+    // ---- MEAL QUEST ITEMS ----
+    // Quest: Tata's coffee (kuchnia — near fridge/counter)
+    { id: 'coffee1', type: 'coffee', x: 130, y: 525, w: 26, h: 26, questId: 'quest_coffee' },
+    { id: 'coffee2', type: 'milk', x: 200, y: 525, w: 26, h: 26, questId: 'quest_coffee' },
+    { id: 'coffee3', type: 'cookie', x: 260, y: 525, w: 26, h: 26, questId: 'quest_coffee' },
+
+    // Quest: Breakfast gofry (fridge items — kuchnia + przedpokój)
+    { id: 'bf1', type: 'egg', x: 100, y: 525, w: 24, h: 24, questId: 'quest_breakfast' },
+    { id: 'bf2', type: 'egg', x: 160, y: 525, w: 24, h: 24, questId: 'quest_breakfast' },
+    { id: 'bf3', type: 'milk', x: 230, y: 525, w: 24, h: 24, questId: 'quest_breakfast' },
+    { id: 'bf4', type: 'cream', x: 310, y: 525, w: 24, h: 24, questId: 'quest_breakfast' },
+    { id: 'bf5', type: 'flour', x: 720, y: 525, w: 24, h: 24, questId: 'quest_breakfast' },
+
+    // Quest: Lunch/obiad (zupa + chleb — kuchnia + salon)
+    { id: 'lu1', type: 'carrot', x: 120, y: 525, w: 24, h: 24, questId: 'quest_lunch' },
+    { id: 'lu2', type: 'carrot', x: 180, y: 525, w: 24, h: 24, questId: 'quest_lunch' },
+    { id: 'lu3', type: 'ingredient', x: 250, y: 525, w: 24, h: 24, questId: 'quest_lunch' },
+    { id: 'lu4', type: 'bread', x: 440, y: 525, w: 24, h: 24, questId: 'quest_lunch' },
+
+    // Quest: Dinner/kolacja (kanapki — chleb, ser, sałatka, sok)
+    { id: 'di1', type: 'bread', x: 140, y: 525, w: 24, h: 24, questId: 'quest_dinner' },
+    { id: 'di2', type: 'cheese', x: 210, y: 525, w: 24, h: 24, questId: 'quest_dinner' },
+    { id: 'di3', type: 'salad', x: 290, y: 525, w: 24, h: 24, questId: 'quest_dinner' },
+    { id: 'di4', type: 'juice', x: 440, y: 525, w: 24, h: 24, questId: 'quest_dinner' },
+    { id: 'di5', type: 'cheese', x: 520, y: 525, w: 24, h: 24, questId: 'quest_dinner' },
+
+    // ---- Quest: Żabka shopping (items inside Żabka) ----
+    { id: 'zab1', type: 'chips', x: ZABKA.x + 30, y: 525, w: 24, h: 24, questId: 'quest_zabka' },
+    { id: 'zab2', type: 'candy', x: ZABKA.x + 80, y: 525, w: 24, h: 24, questId: 'quest_zabka' },
+    { id: 'zab3', type: 'water', x: ZABKA.x + 130, y: 525, w: 24, h: 24, questId: 'quest_zabka' },
+    { id: 'zab4', type: 'ice_cream', x: ZABKA.x + 180, y: 525, w: 24, h: 24, questId: 'quest_zabka' },
+
+    // ---- Quest: Paczkomat (parcels to collect from various locations) ----
+    { id: 'parcel1', type: 'parcel', x: PACZKOMAT.x + 15, y: 480, w: 28, h: 28, questId: 'quest_paczkomat' },
+    { id: 'parcel2', type: 'parcel', x: 800, y: 525, w: 28, h: 28, questId: 'quest_paczkomat' },
+    { id: 'parcel3', type: 'parcel', x: 500, y: 525, w: 28, h: 28, questId: 'quest_paczkomat' },
+
+    // ---- Quest: Movie night (popcorn scattered in house) ----
+    { id: 'pop1', type: 'popcorn', x: 380, y: 525, w: 24, h: 24, questId: 'quest_movie_night' },
+    { id: 'pop2', type: 'popcorn', x: 460, y: 525, w: 24, h: 24, questId: 'quest_movie_night' },
+    { id: 'pop3', type: 'popcorn', x: 540, y: 525, w: 24, h: 24, questId: 'quest_movie_night' },
+    { id: 'pop4', type: 'popcorn', x: 620, y: 525, w: 24, h: 24, questId: 'quest_movie_night' },
+
+    // ---- Antresola items (stars hidden in attic) ----
+    { id: 'attic_star1', type: 'star', x: 260, y: 70, w: 28, h: 28, questId: 'quest_climb' },
+    { id: 'attic_star2', type: 'star', x: 450, y: 70, w: 28, h: 28, questId: 'quest_treasure' },
+
+    // ---- BONUS ARTIFACTS (24 unique per-quest accessories) ----
+    { id: 'art_apples', type: 'artifact', x: 1380, y: 505, w: 28, h: 28, questId: 'quest_apples', label: 'koszyk' },
+    { id: 'art_toys', type: 'artifact', x: 260, y: 275, w: 28, h: 28, questId: 'quest_toys', label: 'pudelko' },
+    { id: 'art_lego', type: 'artifact', x: 580, y: 520, w: 28, h: 28, questId: 'quest_lego', label: 'instrukcja' },
+    { id: 'art_mailman', type: 'artifact', x: 825, y: 520, w: 28, h: 28, questId: 'quest_mailman', label: 'znaczek' },
+    { id: 'art_cook', type: 'artifact', x: 340, y: 520, w: 28, h: 28, questId: 'quest_cook', label: 'fartuszek' },
+    { id: 'art_cat', type: 'artifact', x: 1480, y: 520, w: 28, h: 28, questId: 'quest_cat', label: 'klebek' },
+    { id: 'art_flowers', type: 'artifact', x: 1230, y: 520, w: 28, h: 28, questId: 'quest_flowers', label: 'rekawiczki' },
+    { id: 'art_jurek', type: 'artifact', x: 470, y: 280, w: 28, h: 28, questId: 'quest_jurek', label: 'smycz' },
+    { id: 'art_uncle', type: 'artifact', x: 700, y: 280, w: 28, h: 28, questId: 'quest_uncle', label: 'prezent' },
+    { id: 'art_crane', type: 'artifact', x: 1900, y: 520, w: 28, h: 28, questId: 'quest_crane', label: 'kask' },
+    { id: 'art_garden', type: 'artifact', x: 1280, y: 520, w: 28, h: 28, questId: 'quest_garden_help', label: 'nasionka' },
+    { id: 'art_treasure', type: 'artifact', x: 700, y: 520, w: 28, h: 28, questId: 'quest_treasure', label: 'mapa' },
+    { id: 'art_draw', type: 'artifact', x: 320, y: 280, w: 28, h: 28, questId: 'quest_draw', label: 'blok' },
+    { id: 'art_banana', type: 'artifact', x: 1260, y: 515, w: 28, h: 28, questId: 'quest_banana', label: 'tortownica' },
+    { id: 'art_franek', type: 'artifact', x: 920, y: 520, w: 28, h: 28, questId: 'quest_franek', label: 'pileczka' },
+    { id: 'art_brush', type: 'artifact', x: 790, y: 280, w: 28, h: 28, questId: 'quest_brush_teeth', label: 'pasta' },
+    { id: 'art_wash', type: 'artifact', x: 260, y: 520, w: 28, h: 28, questId: 'quest_wash_hands', label: 'recznik' },
+    { id: 'art_bath', type: 'artifact', x: 670, y: 275, w: 28, h: 28, questId: 'quest_bath', label: 'banki' },
+    { id: 'art_pajamas', type: 'artifact', x: 220, y: 275, w: 28, h: 28, questId: 'quest_pajamas', label: 'maskotka' },
+    { id: 'art_baby', type: 'artifact', x: 810, y: 280, w: 28, h: 28, questId: 'quest_baby', label: 'smoczek' },
+    { id: 'art_rafal', type: 'artifact', x: 460, y: 520, w: 28, h: 28, questId: 'quest_rafal', label: 'pamiatka' },
+    { id: 'art_coffee', type: 'artifact', x: 290, y: 520, w: 28, h: 28, questId: 'quest_coffee', label: 'filizanka' },
+    { id: 'art_breakfast', type: 'artifact', x: 750, y: 520, w: 28, h: 28, questId: 'quest_breakfast', label: 'patelnia' },
+    { id: 'art_dinner', type: 'artifact', x: 500, y: 520, w: 28, h: 28, questId: 'quest_dinner', label: 'talerz' },
+    // ---- ARTIFACTS WAVE 2 (30 new) ----
+    // 13 for quests without artifacts
+    { id: 'art_bathroom', type: 'artifact', x: 610, y: 280, w: 28, h: 28, questId: 'quest_bathroom', label: 'gabka' },
+    { id: 'art_climb', type: 'artifact', x: 2050, y: 250, w: 28, h: 28, questId: 'quest_climb', label: 'lina' },
+    { id: 'art_piano', type: 'artifact', x: 180, y: 280, w: 28, h: 28, questId: 'quest_piano', label: 'metronom' },
+    { id: 'art_baby_name', type: 'artifact', x: 400, y: 280, w: 28, h: 28, questId: 'quest_baby_name', label: 'ramka' },
+    { id: 'art_hospital', type: 'artifact', x: 720, y: 280, w: 28, h: 28, questId: 'quest_hospital_bag', label: 'termos' },
+    { id: 'art_baby_room', type: 'artifact', x: 350, y: 280, w: 28, h: 28, questId: 'quest_baby_room', label: 'lampka' },
+    { id: 'art_baby_gift', type: 'artifact', x: 520, y: 280, w: 28, h: 28, questId: 'quest_baby_gift', label: 'wstazka' },
+    { id: 'art_breathing', type: 'artifact', x: 900, y: 520, w: 28, h: 28, questId: 'quest_breathing', label: 'swieczka' },
+    { id: 'art_lunch', type: 'artifact', x: 360, y: 520, w: 28, h: 28, questId: 'quest_lunch', label: 'chochla' },
+    { id: 'art_zabka', type: 'artifact', x: ZABKA.x + 60, y: 520, w: 28, h: 28, questId: 'quest_zabka', label: 'torba' },
+    { id: 'art_paczkomat', type: 'artifact', x: 600, y: 520, w: 28, h: 28, questId: 'quest_paczkomat', label: 'nozyczki' },
+    { id: 'art_movie', type: 'artifact', x: 440, y: 520, w: 28, h: 28, questId: 'quest_movie_night', label: 'koc' },
+    { id: 'art_comb', type: 'artifact', x: 330, y: 280, w: 28, h: 28, questId: 'quest_comb_hair', label: 'spinki' },
+    // 17 second artifacts for quests that already have 1
+    { id: 'art2_apples', type: 'artifact', x: 1100, y: 510, w: 28, h: 28, questId: 'quest_apples', label: 'drabina' },
+    { id: 'art2_toys', type: 'artifact', x: 140, y: 280, w: 28, h: 28, questId: 'quest_toys', label: 'robot' },
+    { id: 'art2_lego', type: 'artifact', x: 430, y: 520, w: 28, h: 28, questId: 'quest_lego', label: 'minifigurka' },
+    { id: 'art2_cook', type: 'artifact', x: 220, y: 520, w: 28, h: 28, questId: 'quest_cook', label: 'przepis' },
+    { id: 'art2_cat', type: 'artifact', x: 1320, y: 520, w: 28, h: 28, questId: 'quest_cat', label: 'dzwonek' },
+    { id: 'art2_flowers', type: 'artifact', x: 1100, y: 520, w: 28, h: 28, questId: 'quest_flowers', label: 'konewka_mala' },
+    { id: 'art2_jurek', type: 'artifact', x: 300, y: 280, w: 28, h: 28, questId: 'quest_jurek', label: 'obroza' },
+    { id: 'art2_uncle', type: 'artifact', x: 550, y: 520, w: 28, h: 28, questId: 'quest_uncle', label: 'album' },
+    { id: 'art2_crane', type: 'artifact', x: 2100, y: 520, w: 28, h: 28, questId: 'quest_crane', label: 'plan_budowy' },
+    { id: 'art2_treasure', type: 'artifact', x: 250, y: 280, w: 28, h: 28, questId: 'quest_treasure', label: 'kompas' },
+    { id: 'art2_draw', type: 'artifact', x: 550, y: 280, w: 28, h: 28, questId: 'quest_draw', label: 'paleta' },
+    { id: 'art2_banana', type: 'artifact', x: 1150, y: 520, w: 28, h: 28, questId: 'quest_banana', label: 'mikser' },
+    { id: 'art2_brush', type: 'artifact', x: 660, y: 280, w: 28, h: 28, questId: 'quest_brush_teeth', label: 'kubeczek' },
+    { id: 'art2_bath', type: 'artifact', x: 590, y: 280, w: 28, h: 28, questId: 'quest_bath', label: 'mydlo_lux' },
+    { id: 'art2_baby', type: 'artifact', x: 650, y: 520, w: 28, h: 28, questId: 'quest_baby', label: 'gryzak' },
+    { id: 'art2_rafal', type: 'artifact', x: 300, y: 520, w: 28, h: 28, questId: 'quest_rafal', label: 'magnes' },
+    { id: 'art2_coffee', type: 'artifact', x: 180, y: 520, w: 28, h: 28, questId: 'quest_coffee', label: 'termos_kawa' },
+
+    // ---- SEASONAL ARTIFACT ITEMS (60 items, 15 per season) ----
+
+    // == WIOSNA (Spring) — 15 items across 6 quests ==
+    // quest_season_garden_spring (4 items)
+    { id: 'season_wiosna_1', type: 'artifact' as ItemType, x: 1050, y: 520, w: 32, h: 32, questId: 'quest_season_garden_spring', label: 'kwiaty_wiosenne' },
+    { id: 'season_wiosna_2', type: 'artifact' as ItemType, x: 200, y: 520, w: 32, h: 32, questId: 'quest_season_garden_spring', label: 'konewka_ogrod' },
+    { id: 'season_wiosna_3', type: 'artifact' as ItemType, x: 1200, y: 520, w: 32, h: 32, questId: 'quest_season_garden_spring', label: 'nasiona_wiosna' },
+    { id: 'season_wiosna_4', type: 'artifact' as ItemType, x: 400, y: 290, w: 32, h: 32, questId: 'quest_season_garden_spring', label: 'tulipan' },
+    // quest_season_butterflies (5 items)
+    { id: 'season_wiosna_5', type: 'artifact' as ItemType, x: 1300, y: 520, w: 32, h: 32, questId: 'quest_season_butterflies', label: 'motyl_wiosna' },
+    { id: 'season_wiosna_6', type: 'artifact' as ItemType, x: -400, y: 520, w: 32, h: 32, questId: 'quest_season_butterflies', label: 'biedronka' },
+    { id: 'season_wiosna_7', type: 'artifact' as ItemType, x: 600, y: 290, w: 32, h: 32, questId: 'quest_season_butterflies', label: 'krokus' },
+    { id: 'season_wiosna_8', type: 'artifact' as ItemType, x: 1400, y: 520, w: 32, h: 32, questId: 'quest_season_butterflies', label: 'ptasie_gniazdo' },
+    { id: 'season_wiosna_9', type: 'artifact' as ItemType, x: 350, y: 70, w: 32, h: 32, questId: 'quest_season_butterflies', label: 'bocian' },
+    // quest_season_rain_walk (4 items)
+    { id: 'season_wiosna_10', type: 'artifact' as ItemType, x: -500, y: 520, w: 32, h: 32, questId: 'quest_season_rain_walk', label: 'deszczowka' },
+    { id: 'season_wiosna_11', type: 'artifact' as ItemType, x: 750, y: 520, w: 32, h: 32, questId: 'quest_season_rain_walk', label: 'gumowce' },
+    { id: 'season_wiosna_12', type: 'artifact' as ItemType, x: -350, y: 520, w: 32, h: 32, questId: 'quest_season_rain_walk', label: 'parasol' },
+    { id: 'season_wiosna_13', type: 'artifact' as ItemType, x: 500, y: 70, w: 32, h: 32, questId: 'quest_season_rain_walk', label: 'wiosenna_salatka' },
+    // quest_season_birds — shares 2 items from garden_spring via universal matching
+    // quest_season_spring_clean — shares items via universal matching
+    // quest_season_kite — shares items via universal matching
+    // Remaining wiosna fillers for birds/spring_clean/kite (2 more to reach 15)
+    { id: 'season_wiosna_14', type: 'artifact' as ItemType, x: 130, y: 290, w: 32, h: 32, questId: 'quest_season_birds', label: 'rower_wiosna' },
+    { id: 'season_wiosna_15', type: 'artifact' as ItemType, x: -900, y: 520, w: 32, h: 32, questId: 'quest_season_kite', label: 'latawiec' },
+
+    // == LATO (Summer) — 15 items across 6 quests ==
+    // quest_season_beach (5 items)
+    { id: 'season_lato_1', type: 'artifact' as ItemType, x: 1150, y: 520, w: 32, h: 32, questId: 'quest_season_beach', label: 'zamek_z_piasku' },
+    { id: 'season_lato_2', type: 'artifact' as ItemType, x: -300, y: 520, w: 32, h: 32, questId: 'quest_season_beach', label: 'muszla' },
+    { id: 'season_lato_3', type: 'artifact' as ItemType, x: 300, y: 520, w: 32, h: 32, questId: 'quest_season_beach', label: 'raczek' },
+    { id: 'season_lato_4', type: 'artifact' as ItemType, x: 1350, y: 520, w: 32, h: 32, questId: 'quest_season_beach', label: 'plazowa_pilka' },
+    { id: 'season_lato_5', type: 'artifact' as ItemType, x: 250, y: 70, w: 32, h: 32, questId: 'quest_season_beach', label: 'okulary_sloneczne' },
+    // quest_season_ice_cream (4 items)
+    { id: 'season_lato_6', type: 'artifact' as ItemType, x: 150, y: 520, w: 32, h: 32, questId: 'quest_season_ice_cream', label: 'lody_letnie' },
+    { id: 'season_lato_7', type: 'artifact' as ItemType, x: 700, y: 290, w: 32, h: 32, questId: 'quest_season_ice_cream', label: 'arbuz' },
+    { id: 'season_lato_8', type: 'artifact' as ItemType, x: -1000, y: 520, w: 32, h: 32, questId: 'quest_season_ice_cream', label: 'koktajl' },
+    { id: 'season_lato_9', type: 'artifact' as ItemType, x: 550, y: 520, w: 32, h: 32, questId: 'quest_season_ice_cream', label: 'krem_do_opalania' },
+    // quest_season_pool (3 items)
+    { id: 'season_lato_10', type: 'artifact' as ItemType, x: 1450, y: 520, w: 32, h: 32, questId: 'quest_season_pool', label: 'basen' },
+    { id: 'season_lato_11', type: 'artifact' as ItemType, x: 450, y: 290, w: 32, h: 32, questId: 'quest_season_pool', label: 'hamak_lato' },
+    { id: 'season_lato_12', type: 'artifact' as ItemType, x: -800, y: 520, w: 32, h: 32, questId: 'quest_season_pool', label: 'motylki_lato' },
+    // quest_season_grill (1 item) + quest_season_bugs (1 item) + quest_season_lemonade (1 item)
+    { id: 'season_lato_13', type: 'artifact' as ItemType, x: 950, y: 520, w: 32, h: 32, questId: 'quest_season_grill', label: 'grill_letni' },
+    { id: 'season_lato_14', type: 'artifact' as ItemType, x: 600, y: 70, w: 32, h: 32, questId: 'quest_season_bugs', label: 'wiatrak' },
+    { id: 'season_lato_15', type: 'artifact' as ItemType, x: -550, y: 520, w: 32, h: 32, questId: 'quest_season_lemonade', label: 'lemonada' },
+
+    // == JESIEN (Autumn) — 15 items across 6 quests ==
+    // quest_season_mushrooms (5 items)
+    { id: 'season_jesien_1', type: 'artifact' as ItemType, x: 1100, y: 520, w: 32, h: 32, questId: 'quest_season_mushrooms', label: 'grzyb' },
+    { id: 'season_jesien_2', type: 'artifact' as ItemType, x: -450, y: 520, w: 32, h: 32, questId: 'quest_season_mushrooms', label: 'jablko_jesien' },
+    { id: 'season_jesien_3', type: 'artifact' as ItemType, x: 200, y: 290, w: 32, h: 32, questId: 'quest_season_mushrooms', label: 'wiewiorka' },
+    { id: 'season_jesien_4', type: 'artifact' as ItemType, x: 1250, y: 520, w: 32, h: 32, questId: 'quest_season_mushrooms', label: 'herbata_jesienna' },
+    { id: 'season_jesien_5', type: 'artifact' as ItemType, x: 400, y: 70, w: 32, h: 32, questId: 'quest_season_mushrooms', label: 'drozd' },
+    // quest_season_pumpkin (4 items)
+    { id: 'season_jesien_6', type: 'artifact' as ItemType, x: 1400, y: 520, w: 32, h: 32, questId: 'quest_season_pumpkin', label: 'dynia' },
+    { id: 'season_jesien_7', type: 'artifact' as ItemType, x: 500, y: 520, w: 32, h: 32, questId: 'quest_season_pumpkin', label: 'swiecka_jesien' },
+    { id: 'season_jesien_8', type: 'artifact' as ItemType, x: -600, y: 520, w: 32, h: 32, questId: 'quest_season_pumpkin', label: 'latarnia' },
+    { id: 'season_jesien_9', type: 'artifact' as ItemType, x: 300, y: 290, w: 32, h: 32, questId: 'quest_season_pumpkin', label: 'szalik' },
+    // quest_season_chestnuts (2 items)
+    { id: 'season_jesien_10', type: 'artifact' as ItemType, x: -1050, y: 520, w: 32, h: 32, questId: 'quest_season_chestnuts', label: 'kastany' },
+    { id: 'season_jesien_11', type: 'artifact' as ItemType, x: 800, y: 520, w: 32, h: 32, questId: 'quest_season_chestnuts', label: 'jesienny_lisc' },
+    // quest_season_leaves (1 item)
+    { id: 'season_jesien_12', type: 'artifact' as ItemType, x: 650, y: 290, w: 32, h: 32, questId: 'quest_season_leaves', label: 'deszczyk' },
+    // quest_season_pie (2 items)
+    { id: 'season_jesien_13', type: 'artifact' as ItemType, x: 120, y: 520, w: 32, h: 32, questId: 'quest_season_pie', label: 'ciasto_jesien' },
+    { id: 'season_jesien_14', type: 'artifact' as ItemType, x: 550, y: 70, w: 32, h: 32, questId: 'quest_season_pie', label: 'wrzos' },
+    // quest_season_scarecrow (1 item)
+    { id: 'season_jesien_15', type: 'artifact' as ItemType, x: -850, y: 520, w: 32, h: 32, questId: 'quest_season_scarecrow', label: 'dres_jesienny' },
+
+    // == ZIMA (Winter) — 15 items across 6 quests ==
+    // quest_season_snowman (5 items)
+    { id: 'season_zima_1', type: 'artifact' as ItemType, x: 1150, y: 520, w: 32, h: 32, questId: 'quest_season_snowman', label: 'balwan' },
+    { id: 'season_zima_2', type: 'artifact' as ItemType, x: -400, y: 520, w: 32, h: 32, questId: 'quest_season_snowman', label: 'sniezka' },
+    { id: 'season_zima_3', type: 'artifact' as ItemType, x: 350, y: 290, w: 32, h: 32, questId: 'quest_season_snowman', label: 'rekawice' },
+    { id: 'season_zima_4', type: 'artifact' as ItemType, x: 1350, y: 520, w: 32, h: 32, questId: 'quest_season_snowman', label: 'kozuch' },
+    { id: 'season_zima_5', type: 'artifact' as ItemType, x: 300, y: 70, w: 32, h: 32, questId: 'quest_season_snowman', label: 'kominek_zima' },
+    // quest_season_sled (4 items)
+    { id: 'season_zima_6', type: 'artifact' as ItemType, x: -550, y: 520, w: 32, h: 32, questId: 'quest_season_sled', label: 'sanki' },
+    { id: 'season_zima_7', type: 'artifact' as ItemType, x: 600, y: 520, w: 32, h: 32, questId: 'quest_season_sled', label: 'narty' },
+    { id: 'season_zima_8', type: 'artifact' as ItemType, x: 450, y: 70, w: 32, h: 32, questId: 'quest_season_sled', label: 'gwiazda_zima' },
+    { id: 'season_zima_9', type: 'artifact' as ItemType, x: 1450, y: 520, w: 32, h: 32, questId: 'quest_season_sled', label: 'koleda' },
+    // quest_season_christmas_tree (2 items)
+    { id: 'season_zima_10', type: 'artifact' as ItemType, x: 500, y: 290, w: 32, h: 32, questId: 'quest_season_christmas_tree', label: 'choinka' },
+    { id: 'season_zima_11', type: 'artifact' as ItemType, x: 750, y: 290, w: 32, h: 32, questId: 'quest_season_christmas_tree', label: 'bombka' },
+    // quest_season_hot_choc (2 items)
+    { id: 'season_zima_12', type: 'artifact' as ItemType, x: 200, y: 520, w: 32, h: 32, questId: 'quest_season_hot_choc', label: 'czekolada' },
+    { id: 'season_zima_13', type: 'artifact' as ItemType, x: -950, y: 520, w: 32, h: 32, questId: 'quest_season_hot_choc', label: 'piernik' },
+    // quest_season_snow_fight (1 item)
+    { id: 'season_zima_14', type: 'artifact' as ItemType, x: 1000, y: 520, w: 32, h: 32, questId: 'quest_season_snow_fight', label: 'renifer' },
+    // quest_season_presents (1 item)
+    { id: 'season_zima_15', type: 'artifact' as ItemType, x: 650, y: 70, w: 32, h: 32, questId: 'quest_season_presents', label: 'prezent_zima' },
   ],
 
   quests: [
     // Quest 1: Zbierz jabłka
     {
-      id: 'quest_apples', title: '🍎 Zbierz jabłka!', npcId: 'mama',
+      id: 'quest_apples', title: '🍎 Zbierz jabłka!', npcId: 'mama', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Porozmawiaj z Mamą', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 5 jabłek w ogrodzie', icon: '🍎', itemType: 'apple', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 5 jabłek + koszyk 🧺', icon: '🍎', itemType: 'apple', targetCount: 7, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś jabłka Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Rozwiąż zadanie!', icon: '🧮', mathProblem: MATH_PROBLEMS[0], completed: false },
       ],
@@ -636,10 +1480,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 2: Posprzątaj pokój
     {
-      id: 'quest_toys', title: '🧸 Posprzątaj pokój!', npcId: 'tata',
+      id: 'quest_toys', title: '🧸 Posprzątaj pokój!', npcId: 'tata', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Porozmawiaj z Tatą', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 4 zabawki w pokoju', icon: '🧸', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 4 zabawki + pudełko 📦', icon: '🧸', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Wróć do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
         { type: 'math', description: 'Rozwiąż zadanie!', icon: '🧮', mathProblem: MATH_PROBLEMS[1], completed: false },
       ],
@@ -647,10 +1491,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 3: Zbuduj wieżę z LEGO
     {
-      id: 'quest_lego', title: '🧱 Zbuduj wieżę z LEGO!', npcId: 'tata',
+      id: 'quest_lego', title: '🧱 Zbuduj wieżę z LEGO!', npcId: 'tata', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Porozmawiaj z Tatą', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 6 klocków LEGO', icon: '🧱', targetCount: 6, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 6 klocków + instrukcję 📖', icon: '🧱', targetCount: 8, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Wróć do Taty z klockami', icon: '🏃', targetNpcId: 'tata', completed: false },
         { type: 'math', description: 'Policz klocki!', icon: '🧮', mathProblem: MATH_PROBLEMS[6], completed: false },
       ],
@@ -658,10 +1502,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 4: Przepędź kota
     {
-      id: 'quest_cat', title: '🐱 Przepędź kota!', npcId: 'mama',
+      id: 'quest_cat', title: '🐱 Przepędź kota!', npcId: 'mama', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Mama mówi o kocie w ogrodzie', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 ciasteczka na przynętę', icon: '🍪', itemType: 'cookie', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 ciasteczka + kłębek 🧶', icon: '🍪', itemType: 'cookie', targetCount: 5, currentCount: 0, completed: false },
         { type: 'chase', description: 'Podejdź do kota — ucieknie!', icon: '🐱', targetNpcId: 'kot', completed: false },
         { type: 'deliver', description: 'Wróć do Mamy', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Zagadka o ciasteczkach!', icon: '🧮', mathProblem: MATH_PROBLEMS[4], completed: false },
@@ -670,10 +1514,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 5: Listonosz
     {
-      id: 'quest_mailman', title: '📬 Otwórz listonoszowi!', npcId: 'listonosz',
+      id: 'quest_mailman', title: '📬 Otwórz listonoszowi!', npcId: 'listonosz', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Otwórz drzwi listonoszowi', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 listy w przedpokoju', icon: '✉️', itemType: 'letter', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 listy + znaczek 💌', icon: '✉️', itemType: 'letter', targetCount: 4, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś listy Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Policz listy!', icon: '🧮', mathProblem: MATH_PROBLEMS[5], completed: false },
       ],
@@ -681,10 +1525,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 6: Pomóż mamie gotować
     {
-      id: 'quest_cook', title: '🍳 Pomóż mamie gotować!', npcId: 'mama',
+      id: 'quest_cook', title: '🍳 Pomóż mamie gotować!', npcId: 'mama', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Mama potrzebuje składników!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 4 składniki w kuchni', icon: '🥕', itemType: 'ingredient', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 4 składniki + fartuszek 👨‍🍳', icon: '🥕', itemType: 'ingredient', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Daj składniki Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Ile składników razem?', icon: '🧮', mathProblem: MATH_PROBLEMS[9], completed: false },
       ],
@@ -692,10 +1536,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 7: Podlej kwiatki
     {
-      id: 'quest_flowers', title: '🌸 Podlej kwiatki!', npcId: 'mama',
+      id: 'quest_flowers', title: '🌸 Podlej kwiatki!', npcId: 'mama', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Mama prosi o podlanie kwiatów', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 5 kwiatków w ogrodzie', icon: '🌸', itemType: 'flower', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 5 kwiatków + rękawiczki 🧤', icon: '🌸', itemType: 'flower', targetCount: 7, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Wróć do Mamy', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Ile kwiatków zostało?', icon: '🧮', mathProblem: MATH_PROBLEMS[7], completed: false },
       ],
@@ -703,10 +1547,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 8: Znajdź Jurka (plush dog hide and seek)
     {
-      id: 'quest_jurek', title: '🐕 Znajdź Jurka!', npcId: 'tata',
+      id: 'quest_jurek', title: '🐕 Znajdź Jurka!', npcId: 'tata', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Tata mówi: Jurek się schował!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Znajdź 3 pluszaki w domu', icon: '🐕', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Znajdź 3 pluszaki + smycz 🦮', icon: '🐕', targetCount: 5, currentCount: 0, completed: false },
         { type: 'find', description: 'Znajdź Jurka!', icon: '🐕', targetNpcId: 'jurek_npc', completed: false },
         { type: 'deliver', description: 'Zanieś Jurka do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
         { type: 'math', description: 'Ile pluszaków znalazłeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[8], completed: false },
@@ -715,10 +1559,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 9: Kurier — paczka od kuriera
     {
-      id: 'quest_courier', title: '📦 Paczka od kuriera!', npcId: 'mama',
+      id: 'quest_courier', title: '📦 Paczka od kuriera!', npcId: 'mama', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Mama czeka na paczkę', icon: '💬', completed: false },
-        { type: 'collect', description: 'Idź do ogródka — kurier zadzwoni!', icon: '📦', targetCount: 1, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Idź do ogródka + znajdź piłeczkę 🎾', icon: '📦', targetCount: 2, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś paczkę Mamie!', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Zagadka o paczkach!', icon: '🧮', mathProblem: MATH_PROBLEMS[12], completed: false },
       ],
@@ -727,10 +1571,10 @@ export const LEVEL_1: LevelData = {
     // === 10 NEW QUESTS ===
     // Quest 10: Wujek Tomek (BMW 4 Cabrio from left)
     {
-      id: 'quest_uncle', title: '🚗 Wujek przyjechał!', npcId: 'wujek',
+      id: 'quest_uncle', title: '🚗 Wujek przyjechał!', npcId: 'wujek', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Powitaj Wujka Tomka', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 książki od wujka', icon: '📚', itemType: 'book', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 książki + prezent 🎁', icon: '📚', itemType: 'book', targetCount: 5, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś książki Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
         { type: 'math', description: 'Zagadka o książkach!', icon: '🧮', mathProblem: MATH_PROBLEMS[13], completed: false },
       ],
@@ -738,10 +1582,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 11: Budowlaniec (construction site)
     {
-      id: 'quest_crane', title: '🏗️ Pomóż na budowie!', npcId: 'budowlaniec',
+      id: 'quest_crane', title: '🏗️ Pomóż na budowie!', npcId: 'budowlaniec', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Porozmawiaj z Panem Jackiem', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 4 narzędzia na budowie', icon: '🔧', itemType: 'key', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 4 narzędzia + kask ⛑️', icon: '🔧', itemType: 'key', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś narzędzia Panu Jackowi', icon: '🏃', targetNpcId: 'budowlaniec', completed: false },
         { type: 'math', description: 'Policz narzędzia!', icon: '🧮', mathProblem: MATH_PROBLEMS[14], completed: false },
       ],
@@ -749,10 +1593,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 12: Pomóż sąsiadce w ogrodzie
     {
-      id: 'quest_garden_help', title: '🌻 Pomóż Pani Basi!', npcId: 'sasiadka',
+      id: 'quest_garden_help', title: '🌻 Pomóż Pani Basi!', npcId: 'sasiadka', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Pani Basia potrzebuje pomocy', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 konewki w ogrodzie', icon: '🚿', itemType: 'watering_can', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 konewki + nasionka 🌱', icon: '🚿', itemType: 'watering_can', targetCount: 5, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś konewki Pani Basi', icon: '🏃', targetNpcId: 'sasiadka', completed: false },
         { type: 'math', description: 'Ile grządek podlałeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[15], completed: false },
       ],
@@ -760,10 +1604,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 13: Sprzątanie łazienki
     {
-      id: 'quest_bathroom', title: '🧹 Posprzątaj łazienkę!', npcId: 'mama',
+      id: 'quest_bathroom', title: '🧹 Posprzątaj łazienkę!', npcId: 'mama', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Mama prosi o pomoc', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 rzeczy w łazience', icon: '🧹', itemType: 'ingredient', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 rzeczy w łazience', icon: '🧹', itemType: 'ingredient', targetCount: 4, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Powiedz Mamie że gotowe', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Ile zostało brudnych?', icon: '🧮', mathProblem: MATH_PROBLEMS[16], completed: false },
       ],
@@ -771,10 +1615,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 14: Wspinaczka — gwiazdki na budowie
     {
-      id: 'quest_climb', title: '⭐ Gwiazdki na budowie!', npcId: 'budowlaniec',
+      id: 'quest_climb', title: '⭐ Gwiazdki na budowie!', npcId: 'budowlaniec', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Pan Jacek widział gwiazdki', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 5 gwiazdek na rusztowaniach', icon: '⭐', itemType: 'star', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 5 gwiazdek na rusztowaniach', icon: '⭐', itemType: 'star', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Wróć do Pana Jacka', icon: '🏃', targetNpcId: 'budowlaniec', completed: false },
         { type: 'math', description: 'Ile gwiazdek znalazłeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[17], completed: false },
       ],
@@ -782,10 +1626,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 15: Poszukiwanie skarbów
     {
-      id: 'quest_treasure', title: '🔑 Poszukiwanie skarbów!', npcId: 'tata',
+      id: 'quest_treasure', title: '🔑 Poszukiwanie skarbów!', npcId: 'tata', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Tata ukrył skarby po świecie!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Znajdź 4 klucze', icon: '🔑', itemType: 'key', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Znajdź 4 klucze + mapę 🗺️', icon: '🔑', itemType: 'key', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Wróć do Taty z kluczami', icon: '🏃', targetNpcId: 'tata', completed: false },
         { type: 'math', description: 'Ile skrzyń otworzysz?', icon: '🧮', mathProblem: MATH_PROBLEMS[18], completed: false },
       ],
@@ -793,10 +1637,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 16: Narysuj obrazek
     {
-      id: 'quest_draw', title: '🖍️ Narysuj obrazek!', npcId: 'mama',
+      id: 'quest_draw', title: '🖍️ Narysuj obrazek!', npcId: 'mama', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Mama chce obrazek na lodówkę!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 4 kredki', icon: '🖍️', itemType: 'crayon', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 4 kredki + blok 📋', icon: '🖍️', itemType: 'crayon', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś rysunek Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Ile kredek użyłeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[19], completed: false },
       ],
@@ -804,10 +1648,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 17: Koncert na pianinie
     {
-      id: 'quest_piano', title: '🎹 Koncert dla rodziny!', npcId: 'tata',
+      id: 'quest_piano', title: '🎹 Koncert dla rodziny!', npcId: 'tata', category: 'codzienne',
       steps: [
         { type: 'talk', description: 'Tata chce posłuchać koncertu', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 nuty w pokoju Kuby', icon: '🎵', itemType: 'star', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 nuty w pokoju Kuby', icon: '🎵', itemType: 'star', targetCount: 4, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zagraj koncert dla Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
         { type: 'math', description: 'Ile nut zagrałeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[20], completed: false },
       ],
@@ -815,10 +1659,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 18: Tort bananowy
     {
-      id: 'quest_banana', title: '🍌 Tort bananowy!', npcId: 'mama',
+      id: 'quest_banana', title: '🍌 Tort bananowy!', npcId: 'mama', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Mama robi tort bananowy!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 4 banany w ogrodzie', icon: '🍌', itemType: 'banana', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 4 banany + tortownicę 🎂', icon: '🍌', itemType: 'banana', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś banany Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Ile bananów potrzeba?', icon: '🧮', mathProblem: MATH_PROBLEMS[21], completed: false },
       ],
@@ -826,7 +1670,7 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 19: Zabawa z Frankiem
     {
-      id: 'quest_franek', title: '🐾 Zabawa z Frankiem!', npcId: 'mama',
+      id: 'quest_franek', title: '🐾 Zabawa z Frankiem!', npcId: 'mama', category: 'przygody',
       steps: [
         { type: 'talk', description: 'Mama mówi: Franek chce się bawić!', icon: '💬', completed: false },
         { type: 'chase', description: 'Dogoni Franka!', icon: '🐾', targetNpcId: 'franek', completed: false },
@@ -839,10 +1683,10 @@ export const LEVEL_1: LevelData = {
     // === HYGIENE QUESTS (6) ===
     // Quest 20: Mycie zębów
     {
-      id: 'quest_brush_teeth', title: '🪥 Umyj ząbki!', npcId: 'mama',
+      id: 'quest_brush_teeth', title: '🪥 Umyj ząbki!', npcId: 'mama', category: 'higiena',
       steps: [
         { type: 'talk', description: 'Mama mówi: pora na mycie zębów!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Znajdź 3 szczoteczki w domu', icon: '🪥', itemType: 'toothbrush', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Znajdź 3 szczoteczki + pastę 🪥', icon: '🪥', itemType: 'toothbrush', targetCount: 5, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Wróć do Mamy i pokaż zęby!', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Zagadka o zębach!', icon: '🧮', mathProblem: MATH_PROBLEMS[23], completed: false },
       ],
@@ -850,10 +1694,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 21: Mycie rąk (Mirek - lekarz sąsiad uczy higieny)
     {
-      id: 'quest_wash_hands', title: '🧼 Umyj rączki!', npcId: 'mirek',
+      id: 'quest_wash_hands', title: '🧼 Umyj rączki!', npcId: 'mirek', category: 'higiena',
       steps: [
         { type: 'talk', description: 'Pan Mirek uczy o myciu rąk!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 mydełka', icon: '🧼', itemType: 'soap', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 mydełka + ręcznik 🧻', icon: '🧼', itemType: 'soap', targetCount: 5, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Pokaż Panu Mirkowi czyste ręce', icon: '🏃', targetNpcId: 'mirek', completed: false },
         { type: 'math', description: 'Ile razy umyłeś ręce?', icon: '🧮', mathProblem: MATH_PROBLEMS[24], completed: false },
       ],
@@ -861,10 +1705,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 22: Kąpiel
     {
-      id: 'quest_bath', title: '🛁 Pora na kąpiel!', npcId: 'mama',
+      id: 'quest_bath', title: '🛁 Pora na kąpiel!', npcId: 'mama', category: 'higiena',
       steps: [
         { type: 'talk', description: 'Mama mówi: kąpielowe przygody!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz kaczuszki i szampon', icon: '🐤', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz kaczuszki, szampon + bańki 🫧', icon: '🐤', targetCount: 5, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Wróć do Mamy — pora do wanny!', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Zagadka kąpielowa!', icon: '🧮', mathProblem: MATH_PROBLEMS[25], completed: false },
       ],
@@ -872,10 +1716,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 23: Czesanie
     {
-      id: 'quest_comb_hair', title: '💇 Uczesz się!', npcId: 'mama',
+      id: 'quest_comb_hair', title: '💇 Uczesz się!', npcId: 'mama', category: 'higiena',
       steps: [
         { type: 'talk', description: 'Mama mówi: włosy do czesania!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Znajdź 3 grzebienie', icon: '💇', itemType: 'comb', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Znajdź 3 grzebienie', icon: '💇', itemType: 'comb', targetCount: 4, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Pokaż Mamie ładną fryzurę', icon: '🏃', targetNpcId: 'mama', completed: false },
         { type: 'math', description: 'Zagadka o czesaniu!', icon: '🧮', mathProblem: MATH_PROBLEMS[26], completed: false },
       ],
@@ -883,10 +1727,10 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 24: Piżama
     {
-      id: 'quest_pajamas', title: '👕 Ubierz piżamę!', npcId: 'tata',
+      id: 'quest_pajamas', title: '👕 Ubierz piżamę!', npcId: 'tata', category: 'higiena',
       steps: [
         { type: 'talk', description: 'Tata mówi: pora na piżamę!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 3 części piżamy', icon: '👕', itemType: 'pajama', targetCount: 3, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 3 piżamy + maskotkę 🌙', icon: '👕', itemType: 'pajama', targetCount: 4, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Pokaż Tacie gotowego do snu!', icon: '🏃', targetNpcId: 'tata', completed: false },
         { type: 'math', description: 'Ile części ma piżama?', icon: '🧮', mathProblem: MATH_PROBLEMS[28], completed: false },
       ],
@@ -894,7 +1738,7 @@ export const LEVEL_1: LevelData = {
     },
     // Quest 25: Mistrz higieny (meta quest — after completing hygiene quests)
     {
-      id: 'quest_hygiene_master', title: '🏆 Mistrz higieny!', npcId: 'mirek',
+      id: 'quest_hygiene_master', title: '🏆 Mistrz higieny!', npcId: 'mirek', category: 'higiena',
       steps: [
         { type: 'talk', description: 'Pan Mirek ma specjalną nagrodę!', icon: '💬', completed: false },
         { type: 'deliver', description: 'Opowiedz o higienie!', icon: '🏃', targetNpcId: 'mirek', completed: false },
@@ -904,27 +1748,433 @@ export const LEVEL_1: LevelData = {
     },
 
     // === PREGNANCY STORY QUEST ===
-    // Quest 26: Braciszek/siostrzyczka
+    // === SIOSTRZYCZKA QUEST LINE (6 misji o przygotowaniu na poród) ===
+    // Quest 26: Wiadomość o siostrzyczce
     {
-      id: 'quest_baby', title: '👶 Braciszek nadchodzi!', npcId: 'mama',
+      id: 'quest_baby', title: '👶 Siostrzyczka nadchodzi!', npcId: 'mama', category: 'specjalne',
       steps: [
         { type: 'talk', description: 'Mama ma ważną wiadomość!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Zbierz 4 rzeczy dla dzidzi', icon: '🍼', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz 4 rzeczy + smoczek 👶', icon: '🍼', targetCount: 6, currentCount: 0, completed: false },
         { type: 'deliver', description: 'Zanieś wszystko Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
-        { type: 'math', description: 'Ile miesięcy do przyjścia dzidzi?', icon: '🧮', mathProblem: MATH_PROBLEMS[29], completed: false },
+        { type: 'math', description: 'Ile miesięcy nosi się dzidzi?', icon: '🧮', mathProblem: MATH_PROBLEMS[27], completed: false },
       ],
       currentStep: 0, completed: false, active: false, reward: 3, costumeReward: 'hat_baby',
     },
+    // Quest: Imię dla siostrzyczki
+    {
+      id: 'quest_baby_name', title: '💝 Imię dla siostrzyczki', npcId: 'mama', category: 'specjalne',
+      steps: [
+        { type: 'talk', description: 'Porozmawiaj z Mamą o imieniu', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 3 karteczki z imionami', icon: '📝', itemType: 'baby_name_card', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś karteczki do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile liter w imieniu Zuzia?', icon: '🧮', mathProblem: MATH_PROBLEMS[36], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
+    // Quest: Torba do szpitala
+    {
+      id: 'quest_hospital_bag', title: '🏥 Torba do szpitala', npcId: 'mama', category: 'specjalne',
+      steps: [
+        { type: 'talk', description: 'Mama mówi co spakować', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 rzeczy do torby', icon: '👜', itemType: 'hospital_item', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś torbę do Mamy', icon: '🏃', targetNpcId: 'mama', completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
+    // Quest: Pokój dla siostrzyczki
+    {
+      id: 'quest_baby_room', title: '🎀 Pokój dla siostrzyczki', npcId: 'tata', category: 'specjalne',
+      steps: [
+        { type: 'talk', description: 'Tata mówi co przygotować', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 3 dekoracje do pokoju', icon: '🎨', itemType: 'baby_decor', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś dekoracje do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile misiów w pokoju dzidzi?', icon: '🧮', mathProblem: MATH_PROBLEMS[37], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
+    // Quest: Prezent od braciszka
+    {
+      id: 'quest_baby_gift', title: '🎁 Prezent od Kuby', npcId: 'mama', category: 'specjalne',
+      steps: [
+        { type: 'talk', description: 'Mama ma pomysł na prezent', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz materiały na rysunek', icon: '🖍️', itemType: 'craft_supply', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Pokaż rysunek Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
+    // Quest: Ćwiczenia oddechowe z Mamą
+    {
+      id: 'quest_breathing', title: '🫁 Oddychamy razem!', npcId: 'mama', category: 'specjalne',
+      steps: [
+        { type: 'talk', description: 'Mama uczy ćwiczeń oddechowych', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 3 baloniki do ćwiczeń', icon: '🎈', itemType: 'balloon', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Mamy z balonikami', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile oddechów na minutę?', icon: '🧮', mathProblem: MATH_PROBLEMS[38], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
     // Quest: Wujek Rafał wraca z Wietnamu
     {
-      id: 'quest_rafal', title: '🎒 Wujek Rafał wraca!', npcId: 'mama',
+      id: 'quest_rafal', title: '🎒 Wujek Rafał wraca!', npcId: 'mama', category: 'specjalne',
       steps: [
         { type: 'talk', description: 'Mama ma wiadomość o Wujku!', icon: '💬', completed: false },
-        { type: 'collect', description: 'Przygotuj 3 pierogi i 2 ptasie mleczko', icon: '🥟', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'collect', description: 'Zbierz pierogi, ptasie mleczko + pamiątkę 🏝️', icon: '🥟', targetCount: 7, currentCount: 0, completed: false },
         { type: 'math', description: 'Ile jedzenia przygotowałeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[28], completed: false },
         { type: 'deliver', description: 'Powitaj Wujka Rafała!', icon: '🎒', targetNpcId: 'rafal', completed: false },
       ],
       currentStep: 0, completed: false, active: false, reward: 3, costumeReward: 'hat_vietnam',
+    },
+    // Quest: Kawka dla Taty (gabinet/szkolenie)
+    {
+      id: 'quest_coffee', title: '☕ Kawka dla Taty', npcId: 'mama', category: 'posilki',
+      steps: [
+        { type: 'talk', description: 'Mama prosi o pomoc!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz kawę, mleko, ciasteczko + filiżankę ☕', icon: '☕', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś kawkę Tacie do gabinetu', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile kaw piją rodzice?', icon: '🧮', mathProblem: MATH_PROBLEMS[29], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
+    // Quest: Śniadanie — gofry!
+    {
+      id: 'quest_breakfast', title: '🧇 Śniadanie — gofry!', npcId: 'tata', category: 'posilki',
+      steps: [
+        { type: 'talk', description: 'Tata robi gofry!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Podaj składniki + patelnię 🍳', icon: '🧇', targetCount: 6, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś wszystko Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile składników na gofry?', icon: '🧮', mathProblem: MATH_PROBLEMS[30], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 3, costumeReward: 'hat_chef_pro',
+    },
+    // Quest: Obiad — zupa!
+    {
+      id: 'quest_lunch', title: '🍲 Obiad — zupka!', npcId: 'mama', category: 'posilki',
+      steps: [
+        { type: 'talk', description: 'Mama gotuje obiad!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz marchewki, składniki i chleb', icon: '🍲', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś wszystko Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile talerzy zupy?', icon: '🧮', mathProblem: MATH_PROBLEMS[31], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
+    // Quest: Kolacja — kanapki!
+    {
+      id: 'quest_dinner', title: '🍞 Kolacja — kanapki!', npcId: 'mama', category: 'posilki',
+      steps: [
+        { type: 'talk', description: 'Mama przygotowuje kolację!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz kanapki + talerz 🍽️', icon: '🍞', targetCount: 6, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś składniki Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile kanapek zrobiła Mama?', icon: '🧮', mathProblem: MATH_PROBLEMS[32], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 3, costumeReward: 'acc_apron',
+    },
+    // === ŻABKA & PACZKOMAT & MOVIE NIGHT QUESTS ===
+    // Quest: Zakupy w Żabce
+    {
+      id: 'quest_zabka', title: '🐸 Zakupy w Żabce!', npcId: 'mama', category: 'przygody',
+      steps: [
+        { type: 'talk', description: 'Mama daje listę zakupów!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Kup 4 produkty w Żabce', icon: '🛒', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś zakupy Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile produktów kupiłeś?', icon: '🧮', mathProblem: MATH_PROBLEMS[33], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, costumeReward: 'hat_zabka',
+    },
+    // Quest: Odbierz paczkę z Paczkomatu
+    {
+      id: 'quest_paczkomat', title: '📦 Paczka z Paczkomatu!', npcId: 'tata', category: 'przygody',
+      steps: [
+        { type: 'talk', description: 'Tata czeka na paczkę!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Odbierz 3 paczki', icon: '📦', itemType: 'parcel', targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś paczki Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile paczek w paczkomacie?', icon: '🧮', mathProblem: MATH_PROBLEMS[34], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2,
+    },
+    // Quest: Wieczór filmowy z projektorem
+    {
+      id: 'quest_movie_night', title: '🎬 Wieczór filmowy!', npcId: 'tata', category: 'specjalne',
+      steps: [
+        { type: 'talk', description: 'Tata ma pomysł na wieczór!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 porcje popcornu', icon: '🍿', targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś popcorn do salonu', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile osób ogląda film?', icon: '🧮', mathProblem: MATH_PROBLEMS[35], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 3, costumeReward: 'acc_popcorn',
+    },
+
+    // === SEASONAL QUESTS (24 quests, 6 per season) ===
+
+    // ---- WIOSNA (Spring) ----
+    // Quest: Sadzenie kwiatów z mamą
+    {
+      id: 'quest_season_garden_spring', title: '🌷 Sadzenie kwiatów!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama chce sadzić kwiatki!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 wiosenne rzeczy', icon: '🌷', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś kwiatki Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile kwiatków posadziliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[0], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'wiosna' as SeasonType,
+    },
+    // Quest: Łapanie motyli z Frankiem
+    {
+      id: 'quest_season_butterflies', title: '🦋 Łapanie motyli!', npcId: 'franek', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Franek widzi motyle!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 wiosennych skarbów', icon: '🦋', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Franka', icon: '🏃', targetNpcId: 'franek', completed: false },
+        { type: 'math', description: 'Ile motyli widzieliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[1], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'wiosna' as SeasonType,
+    },
+    // Quest: Spacer w deszczu z tatą
+    {
+      id: 'quest_season_rain_walk', title: '🌧️ Spacer w deszczu!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata zaprasza na spacer!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 deszczowe skarby', icon: '☂️', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile kropelek spadło?', icon: '🧮', mathProblem: MATH_PROBLEMS[2], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'wiosna' as SeasonType,
+    },
+    // Quest: Budowanie budki dla ptaków
+    {
+      id: 'quest_season_birds', title: '🪺 Budka dla ptaków!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata chce zbudować budkę!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 materiały', icon: '🪺', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś materiały Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile desek potrzebujemy?', icon: '🧮', mathProblem: MATH_PROBLEMS[3], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'wiosna' as SeasonType,
+    },
+    // Quest: Wielkie sprzątanie ogrodu
+    {
+      id: 'quest_season_spring_clean', title: '🌱 Sprzątanie ogrodu!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama chce posprzątać ogród!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 rzeczy z ogrodu', icon: '🌱', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś wszystko Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile rzeczy posprzątaliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[4], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'wiosna' as SeasonType,
+    },
+    // Quest: Puszczanie latawców
+    {
+      id: 'quest_season_kite', title: '🪁 Puszczamy latawce!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata ma latawce!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 wiosenne rzeczy', icon: '🪁', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile latawców lata?', icon: '🧮', mathProblem: MATH_PROBLEMS[5], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'wiosna' as SeasonType,
+    },
+
+    // ---- LATO (Summer) ----
+    // Quest: Budowanie zamku z piasku
+    {
+      id: 'quest_season_beach', title: '🏖️ Zamek z piasku!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata chce budować zamek!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 letnich skarbów', icon: '🏖️', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile wież ma zamek?', icon: '🧮', mathProblem: MATH_PROBLEMS[6], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'lato' as SeasonType,
+    },
+    // Quest: Przygotuj lody dla rodziny
+    {
+      id: 'quest_season_ice_cream', title: '🍦 Lody dla rodziny!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama chce zrobić lody!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 letnie składniki', icon: '🍦', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś składniki Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile gałek lodów?', icon: '🧮', mathProblem: MATH_PROBLEMS[7], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'lato' as SeasonType,
+    },
+    // Quest: Zabawy w basenie
+    {
+      id: 'quest_season_pool', title: '🏊 Zabawy w basenie!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata napełnił basen!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 rzeczy do basenu', icon: '🏊', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile osób w basenie?', icon: '🧮', mathProblem: MATH_PROBLEMS[8], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'lato' as SeasonType,
+    },
+    // Quest: Pomóż przy grillu
+    {
+      id: 'quest_season_grill', title: '🍖 Pomóż przy grillu!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata rozpala grilla!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 grillowe rzeczy', icon: '🍖', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile kiełbasek na grillu?', icon: '🧮', mathProblem: MATH_PROBLEMS[9], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'lato' as SeasonType,
+    },
+    // Quest: Poszukiwanie owadów
+    {
+      id: 'quest_season_bugs', title: '🐚 Poszukiwanie skarbów!', npcId: 'franek', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Franek szuka skarbów!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 letnie skarby', icon: '🐚', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Pokaż Frankowi', icon: '🏃', targetNpcId: 'franek', completed: false },
+        { type: 'math', description: 'Ile skarbów znaleźliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[10], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'lato' as SeasonType,
+    },
+    // Quest: Zrób lemoniadę
+    {
+      id: 'quest_season_lemonade', title: '🍋 Zrób lemoniadę!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama chce lemoniadę!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 składników', icon: '🍋', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś składniki Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile szklanek lemoniady?', icon: '🧮', mathProblem: MATH_PROBLEMS[11], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'lato' as SeasonType,
+    },
+
+    // ---- JESIEN (Autumn) ----
+    // Quest: Zbieranie grzybów z tatą
+    {
+      id: 'quest_season_mushrooms', title: '🍄 Zbieranie grzybów!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata idzie na grzyby!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 jesiennych skarbów', icon: '🍄', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Pokaż grzyby Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile grzybów zebraliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[0], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'jesien' as SeasonType,
+    },
+    // Quest: Rzeźbienie dyni na Halloween
+    {
+      id: 'quest_season_pumpkin', title: '🎃 Rzeźbienie dyni!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama ma dynie!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 halloweenowe rzeczy', icon: '🎃', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś dynie Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile dyni wyrzeźbiliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[1], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'jesien' as SeasonType,
+    },
+    // Quest: Zbieranie kasztanów
+    {
+      id: 'quest_season_chestnuts', title: '🌰 Zbieranie kasztanów!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata widzi kasztany!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 kasztanów', icon: '🌰', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś kasztany Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile kasztanów mamy?', icon: '🧮', mathProblem: MATH_PROBLEMS[2], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'jesien' as SeasonType,
+    },
+    // Quest: Skaczemy w liściach!
+    {
+      id: 'quest_season_leaves', title: '🍁 Skaczemy w liściach!', npcId: 'franek', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Franek chce bawić się w liściach!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 jesienne liście', icon: '🍁', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Pokaż liście Frankowi', icon: '🏃', targetNpcId: 'franek', completed: false },
+        { type: 'math', description: 'Ile liści zebraliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[3], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'jesien' as SeasonType,
+    },
+    // Quest: Pieczenie ciasta z mamą
+    {
+      id: 'quest_season_pie', title: '🥧 Pieczenie ciasta!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama piecze ciasto!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 składników', icon: '🥧', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś składniki Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile kawałków ciasta?', icon: '🧮', mathProblem: MATH_PROBLEMS[4], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'jesien' as SeasonType,
+    },
+    // Quest: Budowanie straszydła
+    {
+      id: 'quest_season_scarecrow', title: '🧥 Budujemy straszydło!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata buduje straszydło!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 części straszydła', icon: '🧥', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś rzeczy Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile ubrań ma straszydło?', icon: '🧮', mathProblem: MATH_PROBLEMS[5], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'jesien' as SeasonType,
+    },
+
+    // ---- ZIMA (Winter) ----
+    // Quest: Lepienie bałwana
+    {
+      id: 'quest_season_snowman', title: '⛄ Lepienie bałwana!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata lepi bałwana!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 zimowych rzeczy', icon: '⛄', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś Tacie', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile kul ma bałwan?', icon: '🧮', mathProblem: MATH_PROBLEMS[6], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'zima' as SeasonType,
+    },
+    // Quest: Jazda na sankach
+    {
+      id: 'quest_season_sled', title: '🛷 Jazda na sankach!', npcId: 'tata', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Tata bierze sanki!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 zimowe skarby', icon: '🛷', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Taty', icon: '🏃', targetNpcId: 'tata', completed: false },
+        { type: 'math', description: 'Ile razy zjechaliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[7], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'zima' as SeasonType,
+    },
+    // Quest: Ubieranie choinki
+    {
+      id: 'quest_season_christmas_tree', title: '🎄 Ubieramy choinkę!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama przynosi ozdoby!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 ozdób choinkowych', icon: '🎄', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś ozdoby Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile bombek na choince?', icon: '🧮', mathProblem: MATH_PROBLEMS[8], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'zima' as SeasonType,
+    },
+    // Quest: Gorąca czekolada
+    {
+      id: 'quest_season_hot_choc', title: '🍫 Gorąca czekolada!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama robi czekoladę!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 składniki', icon: '🍫', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś składniki Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile kubków czekolady?', icon: '🧮', mathProblem: MATH_PROBLEMS[9], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'zima' as SeasonType,
+    },
+    // Quest: Bitwa na śnieżki!
+    {
+      id: 'quest_season_snow_fight', title: '❄️ Bitwa na śnieżki!', npcId: 'franek', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Franek chce się bawić w śniegu!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 5 śnieżnych skarbów', icon: '❄️', itemType: 'artifact' as ItemType, targetCount: 5, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Wróć do Franka', icon: '🏃', targetNpcId: 'franek', completed: false },
+        { type: 'math', description: 'Ile śnieżek rzuciliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[10], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'zima' as SeasonType,
+    },
+    // Quest: Pakowanie prezentów
+    {
+      id: 'quest_season_presents', title: '🎁 Pakowanie prezentów!', npcId: 'mama', category: 'przygody' as QuestCategory,
+      steps: [
+        { type: 'talk', description: 'Mama pakuje prezenty!', icon: '💬', completed: false },
+        { type: 'collect', description: 'Zbierz 4 prezenty', icon: '🎁', itemType: 'artifact' as ItemType, targetCount: 4, currentCount: 0, completed: false },
+        { type: 'deliver', description: 'Zanieś prezenty Mamie', icon: '🏃', targetNpcId: 'mama', completed: false },
+        { type: 'math', description: 'Ile prezentów zapakowaliśmy?', icon: '🧮', mathProblem: MATH_PROBLEMS[11], completed: false },
+      ],
+      currentStep: 0, completed: false, active: false, reward: 2, season: 'zima' as SeasonType,
     },
   ],
 
@@ -932,6 +2182,8 @@ export const LEVEL_1: LevelData = {
   achievements: ACHIEVEMENTS,
 
   climbables: [
+    // Ladder to antresola (in hall area)
+    { x: 350, y: 330, w: 30, topY: HOUSE.atticFloorY, bottomY: 330, label: 'Drabinka', emoji: '🪜' },
     // Apple tree trunk (garden)
     { x: GARDEN_TREE_X - 12, y: 560, w: 24, topY: 380, bottomY: 560, label: 'Jabłoń', emoji: '🌳' },
     // Construction crane mast
@@ -1138,9 +2390,34 @@ export function getNpcDialog(npcId: string, questId: string, stepIndex: number):
 
   // === PREGNANCY QUEST DIALOG ===
   if (npcId === 'mama' && questId === 'quest_baby') {
-    if (stepIndex === 0) return ['Kuba, usiądź... 💕', 'Mama ma ważną wiadomość!', 'Będziesz miał braciszka lub siostrzyczkę! 👶', 'Pomożesz przygotować pokój?', 'Zbierz rzeczy dla maluszka! 🍼'];
-    if (stepIndex === 2) return ['Wszystko gotowe dla maluszka! 👶💕', 'Będziesz najlepszym starszym bratem!', 'A teraz zagadka...'];
-    return ['Zbierz rzeczy dla dzidzi! 🍼'];
+    if (stepIndex === 0) return ['Kuba, usiądź... 💕', 'Mama ma ważną wiadomość!', 'Będziesz miał siostrzyczkę! 👶🎀', 'Pomożesz przygotować rzeczy dla niej?', 'Zbierz co potrzeba dla maluszka! 🍼'];
+    if (stepIndex === 2) return ['Wszystko gotowe dla siostrzyczki! 👶💕', 'Będziesz najlepszym starszym bratem na świecie!', 'A teraz zagadka...'];
+    return ['Zbierz rzeczy dla siostrzyczki! 🍼'];
+  }
+  if (npcId === 'mama' && questId === 'quest_baby_name') {
+    if (stepIndex === 0) return ['Kuba, jak nazwiemy siostrzyczkę? 💝', 'Poszukaj karteczek z imionami!', 'Rozrzuciłam je po domu... 📝'];
+    if (stepIndex === 2) return ['Jakie ładne imiona! 💕', 'Które Ci się podoba najbardziej?', 'Policzmy literki...'];
+    return ['Szukaj karteczek z imionami! 📝'];
+  }
+  if (npcId === 'mama' && questId === 'quest_hospital_bag') {
+    if (stepIndex === 0) return ['Kuba, muszę spakować torbę do szpitala! 🏥', 'Pomożesz? Potrzebuję:', 'Kocyk, body, pieluszkę i smoczek 👶', 'Poszukaj po domu!'];
+    if (stepIndex === 2) return ['Super! Torba gotowa! 👜💕', 'Jak siostrzyczka się urodzi, będziemy przygotowani!'];
+    return ['Szukaj rzeczy do torby szpitalnej! 👜'];
+  }
+  if (npcId === 'tata' && questId === 'quest_baby_room') {
+    if (stepIndex === 0) return ['Kuba, pomalujemy pokój! 🎨', 'Siostrzyczka potrzebuje ładnego pokoiku!', 'Zbierz dekoracje — gwiazdki, chmurki, motylki! 🎀'];
+    if (stepIndex === 2) return ['Pięknie! Pokój jak z bajki! 🌟', 'Siostrzyczka będzie zachwycona!', 'A teraz policzmy misie...'];
+    return ['Zbierz dekoracje do pokoju! 🎨'];
+  }
+  if (npcId === 'mama' && questId === 'quest_baby_gift') {
+    if (stepIndex === 0) return ['Kuba, a może narysujesz coś dla siostrzyczki? 🎁', 'Prezent od starszego brata!', 'Zbierz kredki i papier! 🖍️'];
+    if (stepIndex === 2) return ['Jaki piękny rysunek! 🖼️💕', 'Siostrzyczka na pewno go pokocha!', 'Powiesisz go nad łóżeczkiem!'];
+    return ['Zbierz materiały na rysunek! 🖍️'];
+  }
+  if (npcId === 'mama' && questId === 'quest_breathing') {
+    if (stepIndex === 0) return ['Kuba, mama ćwiczy oddychanie! 🫁', 'To pomaga przy porodzie 💪', 'Przynieś baloniki — poćwiczymy razem! 🎈'];
+    if (stepIndex === 2) return ['Świetnie ćwiczysz! 🎈💨', 'Teraz mama i Kuba umieją oddychać!', 'Policzmy oddechy...'];
+    return ['Zbierz baloniki! 🎈'];
   }
 
   // Quest: Wujek Rafał
@@ -1148,6 +2425,7 @@ export function getNpcDialog(npcId: string, questId: string, stepIndex: number):
     if (stepIndex === 0) return [
       'Kuba! Mam super wiadomość! 🎉',
       'Wujek Rafał wraca z Wietnamu! ✈️',
+      'Jedzie swoim czerwonym cabrio! 🚗💨',
       'Był tam na długiej podróży z plecakiem 🎒',
       'Zróbmy mu niespodziankę!',
       'Przygotujmy pierogi i Ptasie Mleczko! 🥟🍫',
@@ -1155,7 +2433,7 @@ export function getNpcDialog(npcId: string, questId: string, stepIndex: number):
     ];
     if (stepIndex === 2) return [
       'Super! Jedzenie gotowe! 🥟🍫',
-      'Wujek Rafał właśnie przyjechał taxi! 🚕',
+      'Wujek Rafał właśnie przyjechał cabrio! 🚗',
       'Ale zanim do niego pobiegniemy...',
       'Rozwiąż zagadkę! 🧮',
     ];
@@ -1167,11 +2445,149 @@ export function getNpcDialog(npcId: string, questId: string, stepIndex: number):
       'Jak Ty urosłeś! Daj buziaka! 💕',
       'Wiecie co? Wietnam jest PIĘKNY! 🌴',
       'Przywiozłem Ci prawdziwy kapelusz wietnamski! 🎋',
+      'A widziałeś moje cabrio? Jechałem z dachem otwartym! 🚗💨',
       'A co to? PIEROGI?! I PTASIE MLECZKO?! 🥟🍫',
       'Najlepsza niespodzianka na świecie! 🎉',
       'Kocham Was! Dziękuję Kuba! ❤️',
     ];
     return ['Hej Kuba! Fajnie że wróciłem! 🎒'];
+  }
+
+  // === MEAL QUESTS DIALOG ===
+
+  // Quest: Kawka dla Taty
+  if (npcId === 'mama' && questId === 'quest_coffee') {
+    if (stepIndex === 0) return [
+      'Kuba! ☕',
+      'Tata prowadzi szkolenie w gabinecie! 💻',
+      'Jest bardzo zajęty...',
+      'Zróbmy mu niespodziankę!',
+      'Przygotuj kawkę z mlekiem i ciasteczko! 🍪',
+      'Wszystko jest w kuchni!',
+    ];
+    return ['Przygotuj kawkę dla Taty! ☕'];
+  }
+  if (npcId === 'tata' && questId === 'quest_coffee') {
+    if (stepIndex === 2) return [
+      'O! Kuba! ☕😊',
+      'Kawka dla mnie? Z mlekiem?',
+      'I ciasteczko?! 🍪',
+      'Jesteś najlepszy syn na świecie! ❤️',
+      'Dzięki Tobie dam radę skończyć szkolenie!',
+      'A teraz zagadka...',
+    ];
+    return ['Dzięki za kawkę, Kuba! ☕❤️'];
+  }
+
+  // Quest: Śniadanie — gofry
+  if (npcId === 'tata' && questId === 'quest_breakfast') {
+    if (stepIndex === 0) return [
+      'Dzień dobry, Kuba! 🌅',
+      'Dziś na śniadanie robimy GOFRY! 🧇',
+      'Mama siedzi i odpoczywa.',
+      'Pomożesz mi? 👨‍🍳',
+      'Potrzebuję z lodówki: 2 jajka, mleko, śmietanę i mąkę!',
+      'Leć, szybko! 🏃',
+    ];
+    if (stepIndex === 2) return [
+      'Super! Mamy wszystkie składniki! 🧇',
+      'Jajka, mleko, śmietana, mąka...',
+      'Teraz mieszam ciasto! 🥣',
+      'A teraz zagadka dla Ciebie!',
+    ];
+    return ['Przynieś składniki na gofry! 🧇'];
+  }
+
+  // Quest: Obiad — zupka
+  if (npcId === 'mama' && questId === 'quest_lunch') {
+    if (stepIndex === 0) return [
+      'Kuba! Czas na obiad! 🍲',
+      'Robię zupę marchewkową!',
+      'Pomożesz mi zebrać składniki? 🥕',
+      'Potrzebuję marchewki, inne warzywa i chleb!',
+      'Szukaj po kuchni i jadalni!',
+    ];
+    if (stepIndex === 2) return [
+      'Brawo! Mamy wszystko! 🍲',
+      'Zupa będzie pyszna!',
+      'Cała rodzina usiądzie do stołu! 👨‍👩‍👦',
+      'A teraz zagadka...',
+    ];
+    return ['Zbierz składniki na obiad! 🍲'];
+  }
+
+  // Quest: Kolacja — kanapki
+  if (npcId === 'mama' && questId === 'quest_dinner') {
+    if (stepIndex === 0) return [
+      'Kuba, wieczór! 🌙',
+      'Na kolację robimy kanapki!',
+      'Potrzebuję chleb, sery, sałatę i sok! 🥪',
+      'Pomożesz mi wszystko przygotować?',
+      'Szukaj w kuchni i lodówce!',
+    ];
+    if (stepIndex === 2) return [
+      'Wspaniale! Mamy składniki! 🍞🧀',
+      'Kanapki dla całej rodziny!',
+      'Tata, Mama, Kuba i Franek dostanie kawałeczek! 🐕',
+      'A teraz zagadka...',
+    ];
+    return ['Zbierz składniki na kolację! 🍞'];
+  }
+
+  // === ŻABKA QUEST DIALOG ===
+  if (npcId === 'mama' && questId === 'quest_zabka') {
+    if (stepIndex === 0) return [
+      'Kuba! 🐸',
+      'Potrzebuję kilku rzeczy ze sklepu!',
+      'Żabka jest dalej na ulicy — w lewo!',
+      'Kup chipsy, cukierki, wodę i lody! 🛒',
+      'Uważaj na ulicy! 🚗',
+    ];
+    if (stepIndex === 2) return [
+      'Brawo! Zakupy zrobione! 🛍️',
+      'Dziękuję Kuba!',
+      'A teraz zagadka...',
+    ];
+    return ['Idź do Żabki po zakupy! 🐸'];
+  }
+  if (npcId === 'zabka_clerk' && questId === 'quest_zabka') {
+    return ['Dzień dobry! 🐸', 'Witamy w Żabce!', 'Bierz co potrzebujesz z półek!'];
+  }
+
+  // === PACZKOMAT QUEST DIALOG ===
+  if (npcId === 'tata' && questId === 'quest_paczkomat') {
+    if (stepIndex === 0) return [
+      'Kuba! 📦',
+      'Przyszła wiadomość z Paczkomatu!',
+      'Mamy 3 paczki do odebrania!',
+      'Paczkomat stoi obok Żabki na ulicy!',
+      'Odbierz je i przynieś mi! 📱',
+    ];
+    if (stepIndex === 2) return [
+      'Super! Wszystkie paczki! 📦🎉',
+      'Jedna jest dla Ciebie — niespodzianka!',
+      'A teraz zagadka...',
+    ];
+    return ['Odbierz paczki z Paczkomatu! 📦'];
+  }
+
+  // === MOVIE NIGHT QUEST DIALOG ===
+  if (npcId === 'tata' && questId === 'quest_movie_night') {
+    if (stepIndex === 0) return [
+      'Kuba! 🎬',
+      'Dziś wieczór filmowy!',
+      'Włączymy projektor w salonie! 📽️',
+      'Ale najpierw... POPCORN! 🍿',
+      'Zbierz popcorn po domu!',
+      'I przynieś do salonu!',
+    ];
+    if (stepIndex === 2) return [
+      'Popcorn jest! 🍿🎉',
+      'Mama, Tata, Kuba i Franek!',
+      'Włączamy projektor! 📽️✨',
+      'A teraz zagadka przed filmem...',
+    ];
+    return ['Zbierz popcorn na wieczór filmowy! 🍿'];
   }
 
   return ['...'];

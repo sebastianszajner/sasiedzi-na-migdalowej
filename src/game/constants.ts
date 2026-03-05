@@ -41,7 +41,9 @@ export const HOUSE = {
   floor2Y: 330,
   ceilingF1: 332,
   ceilingF2: 110,
-  roofPeak: 60,
+  atticFloorY: 110,   // attic floor = same as ceiling of 2nd floor
+  atticCeilingY: -10,  // attic ceiling raised for player space
+  roofPeak: -20,       // roof peak raised to accommodate attic
 
   // Parter rooms
   kuchnia: { x: 80, w: 280 },
@@ -52,6 +54,9 @@ export const HOUSE = {
   pokojJurka: { x: 80, w: 300 },
   hall: { x: 380, w: 180 },
   sypialnia: { x: 560, w: 320 },
+
+  // Antresola (attic/mezzanine above Kuba's room)
+  antresola: { x: 200, w: 500 },
 
   // Stairs
   stairsX: 720,
@@ -74,10 +79,10 @@ export const TERRACE = {
   grillX: 930,             // grill position on terrace
 };
 
-// Street (left of house)
+// Street (left of house — extended for Żabka + Paczkomat)
 export const STREET = {
-  startX: -600,
-  endX: -200,
+  startX: -1300,
+  endX: -660,
   y: 556,
   sidewalkX: -200,
   sidewalkW: 80,
@@ -87,24 +92,314 @@ export const STREET = {
   lineColor: '#FFFFFF',
 };
 
-// Garage (built into left side of house)
+// Żabka convenience store (on the street)
+export const ZABKA = {
+  x: -1100,
+  y: 332,
+  w: 240,
+  h: 224,
+  doorX: -1010,
+  doorW: 50,
+  signColor: '#00A651',   // Żabka green
+  wallColor: '#F5F0EB',
+  floorColor: '#D5CFC8',
+};
+
+// Paczkomat (InPost parcel locker next to Żabka)
+export const PACZKOMAT = {
+  x: -830,
+  y: 460,
+  w: 60,
+  h: 96,
+  color: '#FFD700',       // InPost yellow
+  screenColor: '#1A1A1A',
+};
+
+// === EXPANDED MAP: LEFT SIDE (sports zones) ===
+
+// Skate Park (leftmost zone)
+export const SKATE_PARK = {
+  startX: -4500,
+  endX: -3500,
+  y: 556,
+  halfpipeEdgeY: 420,
+  quarterPipeY: 460,
+  railY: 510,
+  bgColor: '#A0A0A0',
+  graffitiBg: '#E0E0E0',
+};
+
+// Basketball court
+export const BASKETBALL = {
+  startX: -3400,
+  endX: -2600,
+  y: 556,
+  hoopY: 430,
+  courtColor: '#E67E22',
+  lineColor: '#FFFFFF',
+};
+
+// Bike path
+export const BIKE_PATH = {
+  startX: -2500,
+  endX: -1700,
+  y: 556,
+  pathColor: '#888888',
+  lineColor: '#FFD700',
+};
+
+// === EXPANDED MAP: RIGHT SIDE (institutions) ===
+
+// Przedszkole (kindergarten) — 200% of house width
+export const PRZEDSZKOLE = {
+  x: 3500,
+  w: 1600,
+  floor1Y: 556,
+  floor2Y: 330,
+  ceilingF1: 332,
+  ceilingF2: 110,
+  wallColor: '#FFF8E1',
+  roofColor: '#FF8F00',
+  signText: 'Przedszkole Migdałowe',
+};
+
+// Szkoła (school) — largest building
+export const SZKOLA = {
+  x: 5500,
+  w: 2300,
+  floor1Y: 556,
+  floor2Y: 330,
+  ceilingF1: 332,
+  ceilingF2: 110,
+  wallColor: '#ECEFF1',
+  roofColor: '#455A64',
+  signText: 'Szkoła Podstawowa nr 3',
+};
+
+// === NEW ZONES (expansion left & right) ===
+
+// City Park (left of skatepark)
+export const CITY_PARK = {
+  startX: -5800,
+  endX: -5000,
+  y: 556,
+  fountainX: -5400,
+  pondX: -5200,
+};
+
+// City Library (left of park)
+export const CITY_LIBRARY = {
+  x: -6400,
+  w: 600,
+  floor1Y: 556,
+  floor2Y: 330,
+  ceilingF1: 332,
+  ceilingF2: 110,
+  wallColor: '#F5F0E8',
+  roofColor: '#6D4C41',
+  signText: 'Biblioteka Miejska',
+};
+
+// City Playground (leftmost)
+export const CITY_PLAYGROUND = {
+  startX: -7200,
+  endX: -6400,
+  y: 556,
+  carouselX: -7000,
+  trampolineX: -6600,
+};
+
+// Park behind school (right of school yard)
+export const PARK_BEHIND_SCHOOL = {
+  startX: 8600,
+  endX: 9200,
+  y: 556,
+};
+
+// Bus stop
+export const BUS_STOP = {
+  x: 9200,
+  w: 300,
+  y: 556,
+};
+
+// Residential area (osiedle)
+export const OSIEDLE = {
+  x: 9500,
+  w: 1500,
+  floor1Y: 556,
+  floor2Y: 380,
+  floor3Y: 210,
+  blockColors: ['#ECEFF1', '#E8EAF6', '#FFF8E1'],
+};
+
+// Vehicles — properties per type
+export const VEHICLE_DEFS = {
+  scooter:       { speed: 5.0, jumpForce: -11, w: 40, h: 28, tricks: ['bunnyHop', 'manual', 'kickflip'] as const, label: 'Hulajnoga' },
+  rollerblades:  { speed: 6.0, jumpForce: -10, w: 32, h: 24, tricks: ['grind', 'slide', 'airSpin'] as const, label: 'Rolki' },
+  bike_kid:      { speed: 4.5, jumpForce: -10, w: 44, h: 30, tricks: ['bunnyHop', 'wheelie'] as const, label: 'Rower dziecięcy' },
+  bike_bmx:      { speed: 6.5, jumpForce: -14, w: 44, h: 30, tricks: ['bunnyHop', 'wheelie', 'manual', 'backflip', 'grind', 'airSpin'] as const, label: 'BMX' },
+  bike_mountain: { speed: 5.5, jumpForce: -12, w: 48, h: 32, tricks: ['bunnyHop', 'wheelie', 'manual', 'stoppie'] as const, label: 'Rower górski' },
+  bike_road:     { speed: 8.0, jumpForce: -9,  w: 50, h: 30, tricks: ['wheelie', 'manual'] as const, label: 'Kolażówka' },
+} as const;
+
+// Vehicle spawn locations
+export const VEHICLE_SPAWNS = [
+  { id: 'bike_kid_garage',  type: 'bike_kid' as const,     x: -130, y: 520 },  // garage
+  { id: 'scooter_zabka',    type: 'scooter' as const,      x: -700, y: 540 },  // near Żabka
+  { id: 'rollers_skatepark', type: 'rollerblades' as const, x: -4200, y: 540 }, // skatepark
+  { id: 'bmx_track',        type: 'bike_bmx' as const,     x: -2100, y: 540 }, // bike path / BMX
+  { id: 'mountain_sport',   type: 'bike_mountain' as const, x: -3000, y: 540 }, // between basketball & skatepark
+  { id: 'road_school',      type: 'bike_road' as const,    x: 5200, y: 540 },  // near school
+] as const;
+
+// Trick scores
+export const TRICK_SCORES: Record<string, number> = {
+  bunnyHop: 10,
+  wheelie: 5,      // per second
+  manual: 5,       // per second
+  grind: 20,       // per rail
+  backflip: 50,
+  stoppie: 15,
+  airSpin: 30,
+  kickflip: 25,
+  slide: 15,
+};
+
+// BMX Pump Track elements (within bike path area -2500 to -1700)
+export const BMX_TRACK = {
+  slalomStart: -2450,
+  slalomEnd: -2300,
+  coneCount: 6,
+  rampX: -2220,
+  rampW: 50,
+  rampH: 36,
+  kickerX: -2080,
+  kickerW: 40,
+  kickerH: 30,
+  bermX: -1960,
+  bermW: 100,
+  dirtJumps: [
+    { x: -1830, w: 30, h: 26 },
+    { x: -1790, w: 30, h: 36 },
+    { x: -1750, w: 30, h: 26 },
+  ],
+  finishX: -1700,
+};
+
+// Bike race definitions
+export const BIKE_RACES = [
+  {
+    id: 'race_sprint_skater',
+    name: 'Sprint ze Skaterem',
+    type: 'sprint' as const,
+    startX: -4200,
+    endX: -1700,
+    opponentId: 'skater',
+    opponentSpeed: 5.2,
+    timeLimit: 0,
+    trickTarget: 0,
+    checkpoints: [-3500, -2800, -2100],
+    requiredVehicle: ['bike_bmx', 'rollerblades', 'scooter'] as string[],
+  },
+  {
+    id: 'race_timeattack_bmx',
+    name: 'BMX Time Attack',
+    type: 'timeAttack' as const,
+    startX: -2500,
+    endX: -1700,
+    opponentId: '',
+    opponentSpeed: 0,
+    timeLimit: 15,
+    trickTarget: 0,
+    checkpoints: [-2200, -1900],
+    requiredVehicle: ['bike_bmx'] as string[],
+  },
+  {
+    id: 'race_tricks_park',
+    name: 'Pokaz Trików w Parku',
+    type: 'trickChallenge' as const,
+    startX: -5800,
+    endX: -5000,
+    opponentId: '',
+    opponentSpeed: 0,
+    timeLimit: 30,
+    trickTarget: 200,
+    checkpoints: [],
+    requiredVehicle: ['bike_bmx', 'bike_mountain', 'rollerblades'] as string[],
+  },
+  {
+    id: 'race_sprint_road',
+    name: 'Wielki Wyścig Szosowy',
+    type: 'sprint' as const,
+    startX: 5500,
+    endX: 9500,
+    opponentId: 'rowerzysta',
+    opponentSpeed: 7.0,
+    timeLimit: 0,
+    trickTarget: 0,
+    checkpoints: [6500, 7500, 8500],
+    requiredVehicle: ['bike_road', 'bike_mountain'] as string[],
+  },
+  {
+    id: 'race_sprint_osiedle',
+    name: 'Wyścig po Osiedlu',
+    type: 'sprint' as const,
+    startX: 9500,
+    endX: 11000,
+    opponentId: 'dziecko_osiedle1',
+    opponentSpeed: 4.0,
+    timeLimit: 0,
+    trickTarget: 0,
+    checkpoints: [10000, 10500],
+    requiredVehicle: ['bike_kid', 'scooter', 'rollerblades'] as string[],
+  },
+];
+
+// Garage (built into left side of house, narrowed for vestibule)
 export const GARAGE = {
   x: -200,
   y: 332,
-  w: 280,
+  w: 200,             // narrowed from 280 — vestibule takes 0-80
   h: 224,
   // Cars inside
-  alfaX: -120,        // Alfa Romeo Junior Veloce (black electric)
-  tiguanX: -10,       // VW Tiguan Allspace (gray SUV)
+  alfaX: -130,        // Alfa Romeo Junior Veloce (black electric)
+  tiguanX: -40,       // VW Tiguan Allspace (gray SUV)
   carY: 510,          // car bottom on garage floor
   // Charging station
   chargerX: -180,
   chargerY: 480,
+  // Garage door opening (left wall, ground level)
+  doorY: 420,         // door top (opening from 420 to groundLevel)
 };
 
-// Garbage bins (between garage and terrace area)
+// Vestibule / Przedsionek (between garage and kitchen)
+export const VESTIBULE = {
+  x: 0,
+  y: 332,
+  w: 80,
+  h: 224,
+};
+
+// Front garden (between house and street, 7x player width)
+export const FRONT_GARDEN = {
+  startX: -630,       // from fence to pergola
+  endX: -260,
+  groundY: 560,
+  fenceX: -630,       // fence position
+};
+
+// Pergola (black metal frame with ivy, at front door)
+export const PERGOLA = {
+  x: -260,
+  w: 60,              // pergola width
+  topY: 370,          // top of pergola
+  bottomY: 560,
+};
+
+// Garbage bins (LEFT side of house, by the front gate)
 export const BINS = {
-  x: 860,             // just outside front door area
+  x: -640,            // by the gate/fence, left side
   y: 530,
   spacing: 22,
   colors: {
@@ -234,11 +529,31 @@ export const COLORS = {
   babyToy: '#F48FB1',
   babyBottle: '#B3E5FC',
   babyBlanket: '#CE93D8',
+  // Siostrzyczka quest items
+  babyNameCard: '#FFE0B2',
+  hospitalItem: '#90CAF9',
+  babyDecor: '#F8BBD0',
+  craftSupply: '#FFCC80',
+  balloon: '#EF5350',
 
   // Wujek Rafał items
   pierogi: '#F5F0DC',
   ptasieMleczko: '#6D4C41',
   backpack: '#FF7043',
+
+  // Food / meals
+  coffee: '#6D4C41',
+  milk: '#F5F5F5',
+  egg: '#FFF9C4',
+  carrot: '#FF7043',
+  cream: '#FFF8E1',
+  flour: '#EFEBE9',
+  gofry: '#D4A574',
+  soup: '#FF8A65',
+  bread: '#D7A86E',
+  cheese: '#FDD835',
+  juice: '#FF9800',
+  salad: '#66BB6A',
 
   // Wujek Rafał character
   rafalShirt: '#2E7D32',     // green travel shirt
@@ -251,6 +566,23 @@ export const COLORS = {
   alfaBlack: '#1A1A1A',
   tiguanGray: '#9E9E9E',
   taxiYellow: '#FDD835',
+
+  // Antresola / attic
+  antresolaWall: '#E8E0D8',
+  antresolaFloor: '#C8AD8A',
+  // Żabka store
+  zabkaGreen: '#00A651',
+  zabkaWall: '#F5F0EB',
+  // Paczkomat
+  paczkomatYellow: '#FFD700',
+  paczkomatGray: '#424242',
+  // AC unit
+  acUnit: '#E0E0E0',
+  acUnitDark: '#BDBDBD',
+  // Projector
+  projectorBody: '#333333',
+  projectorScreen: '#FAFAFA',
+  projectorLight: '#FFE082',
 
   // Costume colors
   hatPirate: '#333333',
@@ -317,6 +649,159 @@ export const ITEM_EMOJIS: Record<string, string> = {
   pierogi: '🥟',
   ptasie_mleczko: '🍫',
   backpack: '🎒',
+  // Food / meals
+  coffee: '☕',
+  milk: '🥛',
+  egg: '🥚',
+  carrot: '🥕',
+  cream: '🍦',
+  flour: '🌾',
+  gofry: '🧇',
+  soup: '🍲',
+  bread: '🍞',
+  cheese: '🧀',
+  juice: '🧃',
+  salad: '🥗',
+  // Żabka / Paczkomat
+  chips: '🍿',
+  candy: '🍬',
+  water: '💧',
+  ice_cream: '🍦',
+  parcel: '📦',
+  popcorn: '🍿',
+  // Siostrzyczka quests
+  baby_name_card: '📝',
+  hospital_item: '👜',
+  baby_decor: '🎨',
+  craft_supply: '🖍️',
+  balloon: '🎈',
+  // Generic artifact (overridden by ARTIFACT_EMOJIS per label)
+  artifact: '🏅',
+};
+
+// Per-quest artifact emoji map (24 unique accessories)
+export const ARTIFACT_EMOJIS: Record<string, string> = {
+  koszyk: '🧺',
+  pudelko: '📦',
+  instrukcja: '📖',
+  znaczek: '💌',
+  fartuszek: '👨‍🍳',
+  klebek: '🧶',
+  rekawiczki: '🧤',
+  smycz: '🦮',
+  prezent: '🎁',
+  kask: '⛑️',
+  nasionka: '🌱',
+  mapa: '🗺️',
+  blok: '📋',
+  tortownica: '🎂',
+  pileczka: '🎾',
+  pasta: '🪥',
+  recznik: '🧻',
+  banki: '🫧',
+  maskotka: '🌙',
+  smoczek: '👶',
+  pamiatka: '🏝️',
+  filizanka: '☕',
+  patelnia: '🍳',
+  talerz: '🍽️',
+  // ---- Wave 2: 13 for quests without artifacts ----
+  gabka: '🧽',
+  lina: '🧗',
+  metronom: '🎹',
+  ramka: '🖼️',
+  termos: '🧊',
+  lampka: '💡',
+  wstazka: '🎀',
+  swieczka: '🕯️',
+  chochla: '🥄',
+  torba: '🛍️',
+  nozyczki: '✂️',
+  koc: '🛋️',
+  spinki: '💈',
+  // ---- Wave 2: 17 second artifacts for existing quests ----
+  drabina: '🪜',
+  robot: '🤖',
+  minifigurka: '🦸',
+  przepis: '📜',
+  dzwonek: '🔔',
+  konewka_mala: '🌺',
+  obroza: '📿',
+  album: '📸',
+  plan_budowy: '📐',
+  kompas: '🧭',
+  paleta: '🎨',
+  mikser: '🫗',
+  kubeczek: '🥤',
+  mydlo_lux: '🛁',
+  gryzak: '🦷',
+  magnes: '🧲',
+  termos_kawa: '♨️',
+  // ---- Wave 3: 60 seasonal artifacts (15 per season) ----
+  // Wiosna (spring)
+  kwiaty_wiosenne: '🌷',
+  konewka_ogrod: '🚿',
+  ptasie_gniazdo: '🪺',
+  biedronka: '🐞',
+  motyl_wiosna: '🦋',
+  krokus: '🌼',
+  deszczowka: '🌧️',
+  gumowce: '🥾',
+  parasol: '☂️',
+  nasiona_wiosna: '🌱',
+  bocian: '🦢',
+  wiosenna_salatka: '🥗',
+  rower_wiosna: '🚲',
+  latawiec: '🪁',
+  tulipan: '🌹',
+  // Lato (summer)
+  lody_letnie: '🍦',
+  basen: '🏊',
+  okulary_sloneczne: '🕶️',
+  arbuz: '🍉',
+  krem_do_opalania: '🧴',
+  zamek_z_piasku: '🏖️',
+  lemonada: '🍋',
+  plazowa_pilka: '🏐',
+  muszla: '🐚',
+  raczek: '🦀',
+  koktajl: '🧃',
+  hamak_lato: '🏝️',
+  grill_letni: '🍖',
+  wiatrak: '🌀',
+  motylki_lato: '🦋',
+  // Jesien (autumn)
+  dynia: '🎃',
+  kastany: '🌰',
+  jesienny_lisc: '🍁',
+  szalik: '🧣',
+  herbata_jesienna: '🍵',
+  grzyb: '🍄',
+  deszczyk: '🌂',
+  jablko_jesien: '🍎',
+  wiewiorka: '🐿️',
+  swiecka_jesien: '🕯️',
+  latarnia: '🏮',
+  drozd: '🐦',
+  ciasto_jesien: '🥧',
+  wrzos: '💐',
+  dres_jesienny: '🧥',
+  // Zima (winter)
+  balwan: '⛄',
+  sanki: '🛷',
+  choinka: '🎄',
+  prezent_zima: '🎁',
+  czekolada: '🍫',
+  rekawice: '🧤',
+  narty: '⛷️',
+  gwiazda_zima: '⭐',
+  bombka: '🔮',
+  piernik: '🍪',
+  kozuch: '🧥',
+  sniezka: '❄️',
+  kominek_zima: '🔥',
+  koleda: '🎵',
+  renifer: '🦌',
 };
 
 // Combo thresholds

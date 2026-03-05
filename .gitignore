@@ -28,3 +28,10 @@ dist-ssr
 
 # Build artifacts
 *.zip
+
+# Raw source assets (not for repo)
+Dom_surowe/
+Plansza_startowa_intro/
+postacie_surowe/
+KUBAQUEST_GAP_ANALYSIS.md
+NANO_BANANA_PROMPT.md

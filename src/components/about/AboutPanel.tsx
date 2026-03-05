@@ -35,49 +35,49 @@ const OPTO_DIMS = [
 
 const TRAINING_AREAS = [
   {
-    icon: '/about/icon-ai.png',
+    icon: 'about/icon-ai.png',
     title: 'AI w biznesie',
     level: 'Flagowy temat',
     desc: 'Od podstaw po zaawansowane wdrożenia. Prompt engineering, automatyzacja procesów, AI w sprzedaży i zarządzaniu.',
     tags: ['ChatGPT', 'Claude', 'Gemini', 'Copilot', 'Automatyzacja'],
   },
   {
-    icon: '/about/icon-sales.png',
+    icon: 'about/icon-sales.png',
     title: 'Psychologia sprzedaży',
     level: '2 dni',
     desc: 'Challenger Sale, SPIN Selling, psychologia decyzji zakupowych, praca z oporem klienta.',
     tags: ['Challenger Sale', 'SPIN', 'Negocjacje', 'Obiekcje'],
   },
   {
-    icon: '/about/icon-communication.png',
+    icon: 'about/icon-communication.png',
     title: 'Komunikacja',
     level: '1–2 dni',
     desc: 'Feedback, NVC, prezentacje, storytelling, trudne rozmowy, asertywność.',
     tags: ['NVC', 'Feedback', 'Storytelling', 'Asertywność'],
   },
   {
-    icon: '/about/icon-leadership.png',
+    icon: 'about/icon-leadership.png',
     title: 'Zarządzanie & Przywództwo',
     level: '1–2 dni',
     desc: 'VUCA leadership, zarządzanie zespołem, delegowanie, motywowanie, zarządzanie zmianą.',
     tags: ['VUCA', 'Delegowanie', 'Motywacja', 'Zmiana'],
   },
   {
-    icon: '/about/icon-effectiveness.png',
+    icon: 'about/icon-effectiveness.png',
     title: 'Efektywność osobista',
     level: '1 dzień',
     desc: 'GTD, Deep Work, zarządzanie energią, priorytetyzacja, produktywność w erze AI.',
     tags: ['GTD', 'Deep Work', 'Priorytety', 'Nawyki'],
   },
   {
-    icon: '/about/icon-group.png',
+    icon: 'about/icon-group.png',
     title: 'Praca z grupą',
     level: '1–2 dni',
     desc: 'Dynamika grupowa, facylitacja, moderowanie dyskusji, zarządzanie konfliktem w grupie.',
     tags: ['Facylitacja', 'Dynamika', 'Tuckman', 'World Café'],
   },
   {
-    icon: '/about/icon-ttt.png',
+    icon: 'about/icon-ttt.png',
     title: 'Train the Trainer',
     level: '2–3 dni',
     desc: 'Projektowanie szkoleń (ROPES), metody aktywne, praca z energią grupy, ewaluacja.',
@@ -210,7 +210,7 @@ export function AboutPanel({ onClose }: { onClose?: () => void }) {
         Każdy temat adaptuję do poziomu grupy — od podstawowego po zaawansowany.
       </p>
       <div className="training-areas-grid">
-          <img src="/about/banner-training.png" alt="Obszary szkoleniowe" className="training-banner" />
+          <img src="about/banner-training.png" alt="Obszary szkoleniowe" className="training-banner" />
         {TRAINING_AREAS.map(area => (
           <div key={area.title} className="training-area-card">
             <div className="training-area-header">

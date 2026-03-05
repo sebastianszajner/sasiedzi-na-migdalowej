@@ -1,7 +1,7 @@
 // ==========================================
 // Sąsiedzi na Migdałowej — Audio System
+// 100% Classical Music (Vivaldi Spring)
 // Procedural sounds via Web Audio API
-// No external files needed!
 // ==========================================
 
 let audioCtx: AudioContext | null = null;
@@ -12,8 +12,8 @@ let musicTimeout: ReturnType<typeof setTimeout> | null = null;
 
 // Audio preferences
 let soundEnabled = true;
-export type MusicStyle = 'off' | 'chill' | 'classical';
-let musicStyle: MusicStyle = 'chill';
+export type MusicStyle = 'off' | 'classical';
+let musicStyle: MusicStyle = 'classical';
 let musicEnabled = true;
 
 function getCtx(): AudioContext {
@@ -38,10 +38,9 @@ export function toggleSound(): boolean {
 }
 
 export function toggleMusic(): MusicStyle {
-  // Cycle: chill → classical → off → chill
-  if (musicStyle === 'chill') musicStyle = 'classical';
-  else if (musicStyle === 'classical') musicStyle = 'off';
-  else musicStyle = 'chill';
+  // Cycle: classical → off → classical
+  if (musicStyle === 'classical') musicStyle = 'off';
+  else musicStyle = 'classical';
 
   musicEnabled = musicStyle !== 'off';
   if (musicGain) musicGain.gain.value = musicEnabled ? 0.12 : 0;
@@ -257,120 +256,253 @@ export function sfxPackagePickup(): void {
   setTimeout(() => playTone(660, 0.15, 'triangle', 0.03), 180);
 }
 
-// ---- Background Music ----
+// ---- Wheel SFX (Wodzirej-style) ----
+export function sfxWheelTick(): void {
+  playTone(1200, 0.03, 'sine', 0.06);
+}
 
-// CHILL — slow, ambient, pentatonic, long sine waves
-const CHILL_NOTES = [
-  { note: 392, dur: 1.0 }, // G4
-  { note: 440, dur: 0.8 }, // A4
-  { note: 523, dur: 1.2 }, // C5
-  { note: 0, dur: 0.6 },   // rest
-  { note: 440, dur: 1.0 }, // A4
-  { note: 392, dur: 0.8 }, // G4
-  { note: 330, dur: 1.5 }, // E4
-  { note: 0, dur: 0.8 },   // rest
-  { note: 523, dur: 0.8 }, // C5
-  { note: 440, dur: 1.2 }, // A4
-  { note: 392, dur: 0.6 }, // G4
-  { note: 330, dur: 1.0 }, // E4
-  { note: 0, dur: 0.4 },   // rest
-  { note: 294, dur: 1.0 }, // D4
-  { note: 330, dur: 0.8 }, // E4
-  { note: 392, dur: 1.5 }, // G4
-  { note: 0, dur: 1.0 },   // long rest
-  { note: 330, dur: 1.2 }, // E4
-  { note: 392, dur: 0.8 }, // G4
-  { note: 440, dur: 1.0 }, // A4
-  { note: 523, dur: 1.5 }, // C5
-  { note: 0, dur: 0.6 },   // rest
-  { note: 440, dur: 0.8 }, // A4
-  { note: 392, dur: 1.2 }, // G4
-  { note: 0, dur: 1.2 },   // long rest before repeat
+export function sfxWheelFanfare(): void {
+  const notes = [523, 659, 784, 1047, 1318, 1568];
+  notes.forEach((freq, i) => {
+    setTimeout(() => playTone(freq, 0.3, 'sine', 0.12), i * 80);
+  });
+}
+
+// ---- Background Music ----
+// Vivaldi "La Primavera" (Spring) — 1st movement main theme
+// Allegro in E major, simplified for oscillator synthesis
+// Brighter, more energetic feel with staccato-like short notes
+
+const VIVALDI_SPRING: { note: number; dur: number }[] = [
+  // Opening motif — joyful, bright E major
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 0, dur: 0.1 },    // rest
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 0, dur: 0.1 },    // rest
+  { note: 659, dur: 0.15 }, // E5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 831, dur: 0.3 },  // G#5
+  { note: 831, dur: 0.15 }, // G#5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 659, dur: 0.3 },  // E5
+  { note: 0, dur: 0.2 },    // rest
+
+  // Descending answer phrase
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 0, dur: 0.1 },    // rest
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 659, dur: 0.2 },  // E5
+  { note: 0, dur: 0.1 },    // rest
+  { note: 659, dur: 0.15 }, // E5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 831, dur: 0.15 }, // G#5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 659, dur: 0.15 }, // E5
+  { note: 554, dur: 0.15 }, // C#5
+  { note: 494, dur: 0.4 },  // B4
+  { note: 0, dur: 0.2 },    // rest
+
+  // Bird song motif — trills and runs
+  { note: 831, dur: 0.12 }, // G#5
+  { note: 880, dur: 0.12 }, // A5
+  { note: 831, dur: 0.12 }, // G#5
+  { note: 740, dur: 0.12 }, // F#5
+  { note: 831, dur: 0.25 }, // G#5
+  { note: 0, dur: 0.1 },    // rest
+  { note: 880, dur: 0.12 }, // A5
+  { note: 988, dur: 0.12 }, // B5
+  { note: 880, dur: 0.12 }, // A5
+  { note: 831, dur: 0.12 }, // G#5
+  { note: 880, dur: 0.25 }, // A5
+  { note: 0, dur: 0.15 },   // rest
+
+  // Gentle flowing passage — Spring feeling
+  { note: 659, dur: 0.25 }, // E5
+  { note: 554, dur: 0.2 },  // C#5
+  { note: 494, dur: 0.2 },  // B4
+  { note: 440, dur: 0.25 }, // A4
+  { note: 494, dur: 0.2 },  // B4
+  { note: 554, dur: 0.2 },  // C#5
+  { note: 659, dur: 0.4 },  // E5
+  { note: 0, dur: 0.15 },   // rest
+
+  // Ascending scale passage
+  { note: 494, dur: 0.15 }, // B4
+  { note: 554, dur: 0.15 }, // C#5
+  { note: 587, dur: 0.15 }, // D5
+  { note: 659, dur: 0.15 }, // E5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 831, dur: 0.15 }, // G#5
+  { note: 880, dur: 0.3 },  // A5
+  { note: 831, dur: 0.2 },  // G#5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 659, dur: 0.4 },  // E5 (rest on tonic)
+  { note: 0, dur: 0.3 },    // rest
+
+  // Repeat motif variation — lower register
+  { note: 494, dur: 0.2 },  // B4
+  { note: 494, dur: 0.2 },  // B4
+  { note: 494, dur: 0.2 },  // B4
+  { note: 0, dur: 0.1 },    // rest
+  { note: 554, dur: 0.15 }, // C#5
+  { note: 659, dur: 0.15 }, // E5
+  { note: 554, dur: 0.15 }, // C#5
+  { note: 494, dur: 0.3 },  // B4
+  { note: 440, dur: 0.2 },  // A4
+  { note: 494, dur: 0.3 },  // B4
+  { note: 0, dur: 0.15 },   // rest
+
+  // Cadence — resolving to E
+  { note: 554, dur: 0.2 },  // C#5
+  { note: 494, dur: 0.15 }, // B4
+  { note: 440, dur: 0.15 }, // A4
+  { note: 494, dur: 0.15 }, // B4
+  { note: 554, dur: 0.15 }, // C#5
+  { note: 659, dur: 0.5 },  // E5 (hold)
+  { note: 0, dur: 0.4 },    // rest before repeat
 ];
 
-// CLASSICAL — waltz-like, triangle waves, rhythmic arpeggios
-const CLASSICAL_NOTES = [
-  // Waltz pattern: 3/4 time, oom-pah-pah style
-  { note: 523, dur: 0.4 }, // C5 (melody)
-  { note: 659, dur: 0.2 }, // E5
-  { note: 784, dur: 0.2 }, // G5
-  { note: 659, dur: 0.2 }, // E5
-  { note: 523, dur: 0.4 }, // C5
-  { note: 0, dur: 0.15 },  // rest
-  { note: 587, dur: 0.4 }, // D5
-  { note: 698, dur: 0.2 }, // F5
-  { note: 880, dur: 0.2 }, // A5
-  { note: 698, dur: 0.2 }, // F5
-  { note: 587, dur: 0.4 }, // D5
-  { note: 0, dur: 0.15 },  // rest
-  { note: 659, dur: 0.4 }, // E5
-  { note: 784, dur: 0.2 }, // G5
-  { note: 988, dur: 0.3 }, // B5
-  { note: 784, dur: 0.2 }, // G5
-  { note: 659, dur: 0.6 }, // E5 (hold)
-  { note: 0, dur: 0.2 },   // rest
-  { note: 784, dur: 0.3 }, // G5
-  { note: 659, dur: 0.2 }, // E5
-  { note: 523, dur: 0.2 }, // C5
-  { note: 392, dur: 0.3 }, // G4
-  { note: 440, dur: 0.2 }, // A4
-  { note: 523, dur: 0.5 }, // C5
-  { note: 0, dur: 0.15 },  // rest
-  { note: 440, dur: 0.3 }, // A4
-  { note: 523, dur: 0.2 }, // C5
-  { note: 659, dur: 0.2 }, // E5
-  { note: 523, dur: 0.2 }, // C5
-  { note: 440, dur: 0.4 }, // A4
-  { note: 392, dur: 0.3 }, // G4
-  { note: 523, dur: 0.8 }, // C5 (ending)
-  { note: 0, dur: 0.5 },   // rest before repeat
+// Mozart — Eine kleine Nachtmusik opening theme (alternating with Vivaldi)
+const MOZART_NACHTMUSIK: { note: number; dur: number }[] = [
+  // Opening forte — G major
+  { note: 392, dur: 0.3 },  // G4
+  { note: 0, dur: 0.05 },   // rest
+  { note: 294, dur: 0.15 }, // D4
+  { note: 392, dur: 0.3 },  // G4
+  { note: 0, dur: 0.05 },   // rest
+  { note: 294, dur: 0.15 }, // D4
+  { note: 392, dur: 0.15 }, // G4
+  { note: 494, dur: 0.15 }, // B4
+  { note: 587, dur: 0.4 },  // D5
+  { note: 0, dur: 0.15 },   // rest
+
+  // Answer phrase
+  { note: 523, dur: 0.3 },  // C5
+  { note: 0, dur: 0.05 },   // rest
+  { note: 330, dur: 0.15 }, // E4
+  { note: 523, dur: 0.3 },  // C5
+  { note: 0, dur: 0.05 },   // rest
+  { note: 330, dur: 0.15 }, // E4
+  { note: 523, dur: 0.15 }, // C5
+  { note: 659, dur: 0.15 }, // E5
+  { note: 784, dur: 0.4 },  // G5
+  { note: 0, dur: 0.2 },    // rest
+
+  // Running passage — lively and bright
+  { note: 784, dur: 0.15 }, // G5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 659, dur: 0.15 }, // E5
+  { note: 740, dur: 0.15 }, // F#5
+  { note: 784, dur: 0.15 }, // G5
+  { note: 0, dur: 0.1 },    // rest
+  { note: 587, dur: 0.15 }, // D5
+  { note: 659, dur: 0.15 }, // E5
+  { note: 587, dur: 0.15 }, // D5
+  { note: 523, dur: 0.15 }, // C5
+  { note: 494, dur: 0.15 }, // B4
+  { note: 0, dur: 0.1 },    // rest
+
+  // Second theme — more lyrical
+  { note: 440, dur: 0.25 }, // A4
+  { note: 494, dur: 0.15 }, // B4
+  { note: 523, dur: 0.15 }, // C5
+  { note: 523, dur: 0.25 }, // C5
+  { note: 0, dur: 0.1 },    // rest
+  { note: 494, dur: 0.2 },  // B4
+  { note: 440, dur: 0.15 }, // A4
+  { note: 392, dur: 0.3 },  // G4
+  { note: 0, dur: 0.15 },   // rest
+
+  // Flowing middle section
+  { note: 392, dur: 0.15 }, // G4
+  { note: 440, dur: 0.15 }, // A4
+  { note: 494, dur: 0.15 }, // B4
+  { note: 523, dur: 0.15 }, // C5
+  { note: 587, dur: 0.15 }, // D5
+  { note: 659, dur: 0.15 }, // E5
+  { note: 587, dur: 0.15 }, // D5
+  { note: 523, dur: 0.25 }, // C5
+  { note: 494, dur: 0.15 }, // B4
+  { note: 440, dur: 0.15 }, // A4
+  { note: 392, dur: 0.4 },  // G4
+  { note: 0, dur: 0.15 },   // rest
+
+  // Recapitulation hint
+  { note: 587, dur: 0.2 },  // D5
+  { note: 523, dur: 0.15 }, // C5
+  { note: 494, dur: 0.15 }, // B4
+  { note: 440, dur: 0.15 }, // A4
+  { note: 494, dur: 0.15 }, // B4
+  { note: 392, dur: 0.5 },  // G4
+  { note: 0, dur: 0.4 },    // rest before repeat
 ];
 
 let melodyIndex = 0;
+let currentPiece = 0; // 0 = Vivaldi, 1 = Mozart (alternate between pieces)
 
-function getActiveNotes(): typeof CHILL_NOTES {
-  return musicStyle === 'classical' ? CLASSICAL_NOTES : CHILL_NOTES;
-}
+const PIECES = [VIVALDI_SPRING, MOZART_NACHTMUSIK];
 
 function playMelodyNote(): void {
   if (!musicEnabled || !musicPlaying) return;
 
   try {
     const ctx = getCtx();
-    const notes = getActiveNotes();
+    const notes = PIECES[currentPiece];
     const { note, dur } = notes[melodyIndex % notes.length];
     melodyIndex++;
 
-    const isChill = musicStyle === 'chill';
-    const oscType: OscillatorType = isChill ? 'sine' : 'triangle';
-    const melodyVol = isChill ? 0.06 : 0.08;
-    const harmonyVol = isChill ? 0.03 : 0.02;
+    // Switch piece when current one finishes
+    if (melodyIndex >= notes.length) {
+      melodyIndex = 0;
+      currentPiece = (currentPiece + 1) % PIECES.length;
+    }
 
     if (note > 0) {
-      // Melody voice
+      // Melody voice — triangle wave for classical warmth
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = oscType;
+      osc.type = 'triangle';
       osc.frequency.value = note;
-      gain.gain.setValueAtTime(melodyVol, ctx.currentTime);
-      gain.gain.setValueAtTime(melodyVol, ctx.currentTime + dur * 0.7);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime + dur * 0.7);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
       osc.connect(gain);
       gain.connect(musicGain!);
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + dur);
 
-      // Soft harmony (fifth below for chill, octave below for classical)
+      // Soft harmony — octave below
       const osc2 = ctx.createOscillator();
       const gain2 = ctx.createGain();
-      osc2.type = oscType;
-      osc2.frequency.value = isChill ? note * 0.667 : note * 0.5;
-      gain2.gain.setValueAtTime(harmonyVol, ctx.currentTime);
+      osc2.type = 'sine';
+      osc2.frequency.value = note * 0.5;
+      gain2.gain.setValueAtTime(0.025, ctx.currentTime);
       gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
       osc2.connect(gain2);
       gain2.connect(musicGain!);
       osc2.start(ctx.currentTime);
       osc2.stop(ctx.currentTime + dur);
+
+      // Third voice — fifth above, very quiet (string ensemble feel)
+      if (dur > 0.2) {
+        const osc3 = ctx.createOscillator();
+        const gain3 = ctx.createGain();
+        osc3.type = 'sine';
+        osc3.frequency.value = note * 1.5;
+        gain3.gain.setValueAtTime(0.012, ctx.currentTime);
+        gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc3.connect(gain3);
+        gain3.connect(musicGain!);
+        osc3.start(ctx.currentTime);
+        osc3.stop(ctx.currentTime + dur);
+      }
     }
 
     // Schedule next note

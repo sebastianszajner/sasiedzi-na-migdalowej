@@ -7,11 +7,13 @@
 import type {
   GameState, Player, NPC, CollectibleItem, DialogState, MathProblem,
   LevelData, ItemType, CostumeSlot, Achievement, InteractiveObject,
+  ParallaxCloud, Vehicle, VehicleType, TrickState, RaceType,
 } from './types';
 import {
   GRAVITY, JUMP_FORCE, MOVE_SPEED, CLIMB_SPEED, MAX_FALL_SPEED,
   FRICTION, PLAYER_W, PLAYER_H, CANVAS_W, CANVAS_H,
   ITEM_FLOAT_SPEED, ITEM_EMOJIS, COMBO, COLORS, GARDEN, HOUSE,
+  VEHICLE_DEFS, VEHICLE_SPAWNS, TRICK_SCORES, BIKE_RACES,
 } from './constants';
 import { getNpcDialog } from './level';
 import {
@@ -19,6 +21,40 @@ import {
   sfxTapToggle, sfxPianoNote, sfxBookOpen,
   sfxDoorbell, sfxPackagePickup,
 } from './audio';
+
+// ---- Generate parallax clouds ----
+function generateClouds(): ParallaxCloud[] {
+  const clouds: ParallaxCloud[] = [];
+  for (let i = 0; i < 12; i++) {
+    const layer = i < 4 ? 0 : i < 8 ? 1 : 2;
+    clouds.push({
+      x: Math.random() * 4000 - 1500,
+      y: -80 + Math.random() * 120 + layer * 20,
+      w: 60 + Math.random() * 100,
+      h: 20 + Math.random() * 30,
+      speed: 0.08 + layer * 0.06 + Math.random() * 0.04,
+      opacity: 0.3 + layer * 0.15,
+      layer,
+    });
+  }
+  return clouds;
+}
+
+// ---- Spawn Franek companion ----
+function spawnCompanion(state: GameState): void {
+  if (state.companionFranek) return;
+  state.companionFranek = {
+    x: state.player.x - 60,
+    y: state.player.y + 42,
+    vx: 0, vy: 0,
+    dir: state.player.dir,
+    onGround: true,
+    tailWag: 0,
+    emotion: 'happy',
+    followDelay: 0,
+    posHistory: [],
+  };
+}
 
 // ---- Shuffle quests & randomize collect counts for replayability ----
 function shuffleAndRandomizeQuests(quests: GameState['quests']): GameState['quests'] {
@@ -82,9 +118,16 @@ export function createGameState(level: LevelData): GameState {
     jumpBufferTimer: 0,
     wasOnGround: false,
     prevVy: 0,
+    emotion: 'neutral',
+    emotionTimer: 0,
   };
 
-  const npcs: NPC[] = level.npcs.map(n => ({ ...n, photoUrl: null }));
+  const npcs: NPC[] = level.npcs.map(n => ({
+    ...n,
+    photoUrl: null,
+    idlePhase: Math.random() * Math.PI * 2,
+    blinkTimer: 2 + Math.random() * 4,
+  }));
   const items: CollectibleItem[] = level.items.map(i => ({
     ...i,
     collected: false,
@@ -142,9 +185,41 @@ export function createGameState(level: LevelData): GameState {
     courierPackage: null,
     climbables: level.climbables ? [...level.climbables] : [],
     rcCar: null,
+    // Vehicles
+    vehicles: VEHICLE_SPAWNS.map(s => ({
+      id: s.id,
+      type: s.type as VehicleType,
+      x: s.x,
+      y: s.y,
+      parkX: s.x,
+      parkY: s.y,
+      vx: 0,
+      dir: 1 as const,
+      active: false,
+      trickState: 'none' as TrickState,
+      trickTimer: 0,
+      trickScore: 0,
+      comboCount: 0,
+      comboTimer: 0,
+      wheelieAngle: 0,
+      airRotation: 0,
+    })),
+    activeVehicle: null,
     freezeTimer: 0,
     streetCars: [],
     streetCarTimer: 3 + Math.random() * 5,
+    // Parallax clouds (pre-generated)
+    parallaxClouds: generateClouds(),
+    // Day/night (start at morning ~0.15)
+    dayTime: 0.2,  // start at morning (0.25=noon)
+    // Franek companion (activated during quest_franek or always after quest)
+    companionFranek: null,
+    // Screen transition
+    screenTransition: { type: 'fade', progress: 0, active: false },
+    // Seasons
+    season: 'wiosna',
+    // Bike races
+    bikeRace: null,
   };
 
   // Setup first quest's NPC — emote + visibility (shuffle may pick any quest first)
@@ -221,7 +296,7 @@ export function updateGame(state: GameState, dt: number): void {
     checkAchievement(state, 'achievement_explorer');
   }
   checkItemCollection(state);
-  updateItems(state);
+  updateItems(state, dt);
   updateNPCBehavior(state, dt);
   autoInteractNPC(state);
   autoInteractObjects(state, dt);
@@ -233,7 +308,15 @@ export function updateGame(state: GameState, dt: number): void {
   updateAirplanes(state, dt);
   updateCourierQuest(state, dt);
   updateRCCar(state, dt);
+  updateVehicleTricks(state, dt);
+  updateBikeRace(state, dt);
   updateStreetTraffic(state, dt);
+  updateParallaxClouds(state, dt);
+  updateDayNightCycle(state, dt);
+  updateNPCIdle(state, dt);
+  updatePlayerEmotion(state, dt);
+  updateCompanionFranek(state, dt);
+  updateScreenTransition(state, dt);
 }
 
 // ---- Auto-enter stairs when pressing Up or Down near stairs ----
@@ -258,8 +341,8 @@ function autoEnterStairs(state: GameState): void {
       return;
     }
 
-    // Going DOWN: player near top of stairs (on 2nd floor)
-    if (down && dist < 60 && Math.abs(player.y + player.h - stair.topY) < 20) {
+    // Going DOWN: player near top of stairs (on 2nd floor) — wider tolerance
+    if (down && dist < 80 && Math.abs(player.y + player.h - stair.topY) < 30) {
       player.onStairs = true;
       player.onGround = false;
       player.x = stair.x + stair.w / 2 - player.w / 2;
@@ -284,14 +367,14 @@ function checkClimbableProximity(state: GameState): void {
       const cx = cl.x + cl.w / 2;
       const dist = Math.abs(px - cx);
 
-      if (up && dist < 30 && player.y + player.h >= cl.topY && player.y + player.h <= cl.bottomY + 10) {
+      if (up && dist < 40 && player.y + player.h >= cl.topY && player.y + player.h <= cl.bottomY + 10) {
         player.onStairs = true; // reuse stairs climbing mechanic
         player.onGround = false;
         player.x = cl.x + cl.w / 2 - player.w / 2;
         player.vy = -CLIMB_SPEED;
         return;
       }
-      if (down && dist < 30 && player.y + player.h >= cl.topY && player.y + player.h <= cl.bottomY + 10) {
+      if (down && dist < 40 && player.y + player.h >= cl.topY - 5 && player.y + player.h <= cl.bottomY + 10) {
         player.onStairs = true;
         player.onGround = false;
         player.x = cl.x + cl.w / 2 - player.w / 2;
@@ -301,26 +384,31 @@ function checkClimbableProximity(state: GameState): void {
     }
   }
 
-  // Keep player on climbable while climbing
+  // Keep player on climbable while climbing — find active climbable and clamp
   if (player.onStairs) {
     for (const cl of climbables) {
       const cx = cl.x + cl.w / 2;
       const dist = Math.abs(px - cx);
-      if (dist < 40 && player.y + player.h >= cl.topY && player.y <= cl.bottomY) {
-        // Clamp player to climbable bounds
-        if (player.y + player.h < cl.topY) {
-          player.y = cl.topY - player.h;
-          player.vy = 0;
-          player.onStairs = false;
-          player.onGround = true;
-          player.jumpCount = 0;
-        }
-        if (player.y + player.h > cl.bottomY) {
-          player.y = cl.bottomY - player.h;
-          player.vy = 0;
-          player.onStairs = false;
-          player.onGround = true;
-          player.jumpCount = 0;
+      if (dist < 40) {
+        // Check if player is within extended bounds (allow small overshoot)
+        if (player.y + player.h >= cl.topY - 10 && player.y <= cl.bottomY + 10) {
+          // Clamp to top
+          if (player.y + player.h < cl.topY) {
+            player.y = cl.topY - player.h;
+            player.vy = 0;
+            player.onStairs = false;
+            player.onGround = true;
+            player.jumpCount = 0;
+          }
+          // Clamp to bottom
+          if (player.y + player.h > cl.bottomY) {
+            player.y = cl.bottomY - player.h;
+            player.vy = 0;
+            player.onStairs = false;
+            player.onGround = true;
+            player.jumpCount = 0;
+          }
+          break; // only clamp to nearest climbable
         }
       }
     }
@@ -484,6 +572,20 @@ export function toggleInteractiveObject(state: GameState, obj: InteractiveObject
         toggleRCControl(state);
       }
       break;
+    case 'projector':
+      sfxTvToggle(obj.state); // reuse TV sound for projector
+      state.message = {
+        text: obj.state ? '📽️ Projektor włączony! Ekran opuszczony!' : '📽️ Projektor wyłączony',
+        timer: 2, icon: '📽️',
+      };
+      break;
+    case 'paczkomat':
+      state.message = {
+        text: '📦 Paczkomat otwarty! Sprawdź swoje paczki!',
+        timer: 2, icon: '📦',
+      };
+      obj.state = false; // reset
+      break;
   }
 
   // Spawn particles
@@ -500,6 +602,58 @@ function handleInput(state: GameState): void {
   const jump = keys.has(' ');
 
   player.walking = false;
+
+  // === VEHICLE MODE ===
+  if (state.activeVehicle) {
+    const v = state.activeVehicle;
+    const def = VEHICLE_DEFS[v.type];
+    player.crouching = false;
+    player.lying = false;
+
+    const ACCEL = 0.5;
+    const targetVx = left ? -def.speed : right ? def.speed : 0;
+    if (left || right) {
+      player.vx += (targetVx - player.vx) * ACCEL;
+      player.dir = left ? -1 : 1;
+      v.dir = player.dir;
+      player.walking = true;
+    } else {
+      player.vx *= FRICTION;
+      if (Math.abs(player.vx) < 0.1) player.vx = 0;
+    }
+    v.vx = player.vx;
+    v.x = player.x;
+    v.y = player.y;
+
+    // Trick detection on vehicle
+    if (down && player.onGround && (def.tricks as readonly string[]).includes('manual')) {
+      if (v.trickState === 'none') {
+        v.trickState = 'manual';
+        v.trickTimer = 0;
+      }
+    } else if (up && player.onGround && (def.tricks as readonly string[]).includes('wheelie')) {
+      if (v.trickState === 'none') {
+        v.trickState = 'wheelie';
+        v.trickTimer = 0;
+        v.wheelieAngle = 0;
+      }
+    } else if (!down && !up && v.trickState === 'manual') {
+      v.trickState = 'none';
+    } else if (!up && v.trickState === 'wheelie') {
+      v.trickState = 'none';
+      v.wheelieAngle = 0;
+    }
+
+    // Walk cycle
+    if (player.walking) {
+      player.walkTimer += 0.12;
+      player.walkFrame = Math.floor(player.walkTimer) % 8;
+    } else {
+      player.walkFrame = 0;
+      player.walkTimer = 0;
+    }
+    return; // skip normal input handling
+  }
 
   if (player.onStairs) {
     // On stairs: no crouching/lying
@@ -528,22 +682,30 @@ function handleInput(state: GameState): void {
       player.vx = 0;
       player.walking = false;
     } else {
-      // Normal horizontal movement
-      if (left) { player.vx = -MOVE_SPEED; player.dir = -1; player.walking = true; }
-      else if (right) { player.vx = MOVE_SPEED; player.dir = 1; player.walking = true; }
-      else {
+      // Smooth acceleration movement (not instant)
+      const ACCEL = 0.6;   // acceleration rate
+      const targetVx = left ? -MOVE_SPEED : right ? MOVE_SPEED : 0;
+      if (left || right) {
+        player.vx += (targetVx - player.vx) * ACCEL;
+        player.dir = left ? -1 : 1;
+        player.walking = true;
+      } else {
         player.vx *= FRICTION;
         if (Math.abs(player.vx) < 0.1) player.vx = 0;
       }
     }
   }
 
+  // 8-frame walk cycle for smoother animation
   if (player.walking) {
-    player.walkTimer += 0.15;
-    player.walkFrame = Math.floor(player.walkTimer) % 4;
+    player.walkTimer += 0.12;
+    player.walkFrame = Math.floor(player.walkTimer) % 8;
   } else {
-    player.walkFrame = 0;
-    player.walkTimer = 0;
+    // Smooth deceleration of walkTimer
+    if (player.walkTimer > 0) {
+      player.walkFrame = 0;
+      player.walkTimer = 0;
+    }
   }
 }
 
@@ -555,17 +717,29 @@ export function playerCrouchOrLie(state: GameState): void {
 
   // Don't crouch if near stairs — DOWN is used to descend
   const px = player.x + player.w / 2;
+  let nearStairs = false;
   for (const stair of stairs) {
     const sx = stair.x + stair.w / 2;
-    if (Math.abs(px - sx) < 60 && Math.abs(player.y + player.h - stair.topY) < 20) {
-      return; // near stairs top — let autoEnterStairs handle DOWN
+    if (Math.abs(px - sx) < 80 && Math.abs(player.y + player.h - stair.topY) < 30) {
+      nearStairs = true;
+      break; // near stairs top — let autoEnterStairs handle DOWN
     }
-    if (Math.abs(px - sx) < 60 && player.y + player.h >= stair.topY && player.y + player.h <= stair.bottomY + 10) {
-      return; // on/near stairs body — don't crouch
+    if (Math.abs(px - sx) < 80 && player.y + player.h >= stair.topY && player.y + player.h <= stair.bottomY + 10) {
+      nearStairs = true;
+      break; // on/near stairs body — don't crouch
     }
   }
+  // Also check climbables (ladders)
+  for (const cl of state.climbables) {
+    const cx = cl.x + cl.w / 2;
+    if (Math.abs(px - cx) < 40 && player.y + player.h >= cl.topY && player.y + player.h <= cl.bottomY + 10) {
+      nearStairs = true;
+      break;
+    }
+  }
+  if (nearStairs) return;
 
-  // Drop-through: if on 2nd floor platform (y+h ≈ 330), drop down
+  // Drop-through: if on 2nd floor platform (y+h ≈ 330), drop down — but NOT near stairs
   if (player.onGround && player.y + player.h < 400) {
     player.dropThrough = 0.3; // ignore thin platforms for 0.3s
     player.onGround = false;
@@ -598,6 +772,62 @@ const JUMP_BUFFER_FRAMES = 7; // ~116ms — buffer jump input before landing
 export function playerJump(state: GameState): boolean {
   if (state.phase !== 'playing') return false;
   const { player } = state;
+
+  // Vehicle jump
+  if (state.activeVehicle) {
+    const v = state.activeVehicle;
+    const def = VEHICLE_DEFS[v.type];
+    player.jumpBufferTimer = JUMP_BUFFER_FRAMES;
+    const canGroundJump = (player.onGround || player.coyoteTimer > 0) && !player.onStairs;
+    if (canGroundJump && player.jumpCount === 0) {
+      player.vy = def.jumpForce;
+      player.onGround = false;
+      player.jumpCount = 1;
+      player.coyoteTimer = 0;
+      player.jumpBufferTimer = 0;
+      player.scaleX = 0.75;
+      player.scaleY = 1.3;
+      // Trick: bunnyHop on jump
+      if ((def.tricks as readonly string[]).includes('bunnyHop') && v.trickState === 'none') {
+        v.trickState = 'bunnyHop';
+        v.trickTimer = 0;
+        v.comboCount++;
+        v.comboTimer = 2;
+        v.trickScore += TRICK_SCORES.bunnyHop || 10;
+        spawnFloatingText(state, player.x + player.w / 2, player.y - 10, 'Bunny Hop!', '#4CAF50', 18);
+      }
+      spawnJumpParticles(state, player.x + player.w / 2, player.y + player.h);
+      return true;
+    }
+    // Airborne trick: backflip (BMX) or airSpin
+    if (!player.onGround && player.jumpCount === 1) {
+      if ((def.tricks as readonly string[]).includes('backflip') && v.trickState !== 'backflip') {
+        v.trickState = 'backflip';
+        v.airRotation = 0;
+        v.trickTimer = 0;
+        v.comboCount++;
+        v.comboTimer = 2;
+        v.trickScore += TRICK_SCORES.backflip || 50;
+        spawnFloatingText(state, player.x + player.w / 2, player.y - 20, 'Backflip!', '#FF5722', 22);
+        player.vy = JUMP_FORCE * 0.7;
+        player.jumpCount = 2;
+        return true;
+      } else if ((def.tricks as readonly string[]).includes('airSpin') && v.trickState !== 'airSpin') {
+        v.trickState = 'airSpin';
+        v.airRotation = 0;
+        v.trickTimer = 0;
+        v.comboCount++;
+        v.comboTimer = 2;
+        v.trickScore += TRICK_SCORES.airSpin || 30;
+        spawnFloatingText(state, player.x + player.w / 2, player.y - 20, 'Air Spin!', '#2196F3', 20);
+        player.vy = JUMP_FORCE * 0.7;
+        player.jumpCount = 2;
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Stand up first if crouching/lying — don't jump
   if (player.crouching || player.lying) {
     player.crouching = false;
@@ -826,7 +1056,15 @@ function showQuestNPCs(state: GameState, questId: string): void {
   if (questId === 'quest_franek') showNpc(state, 'franek');
   if (questId === 'quest_wash_hands' || questId === 'quest_hygiene_master') showNpc(state, 'mirek');
   if (questId === 'quest_baby') showNpc(state, 'mama');
+  if (questId === 'quest_baby_name') showNpc(state, 'mama');
+  if (questId === 'quest_hospital_bag') showNpc(state, 'mama');
+  if (questId === 'quest_baby_room') showNpc(state, 'tata');
+  if (questId === 'quest_baby_gift') showNpc(state, 'mama');
+  if (questId === 'quest_breathing') showNpc(state, 'mama');
   if (questId === 'quest_rafal') { showNpc(state, 'mama'); showNpc(state, 'rafal'); }
+  if (questId === 'quest_zabka') showNpc(state, 'zabka_clerk');
+  if (questId === 'quest_police') showNpc(state, 'policjant');
+  // Food quests — mama and tata are always visible, no special NPC show needed
 }
 
 // ---- NPC AI Behavior ----
@@ -918,20 +1156,8 @@ function updateGameJuice(state: GameState, dt: number): void {
       const squashAmount = Math.min(0.4, impactSpeed * 0.03);
       p.scaleX = 1 + squashAmount;
       p.scaleY = 1 - squashAmount;
-      // Landing dust particles
-      const dustCount = Math.min(8, Math.floor(impactSpeed * 0.5));
-      for (let i = 0; i < dustCount; i++) {
-        state.particles.push({
-          x: p.x + p.w / 2 + (Math.random() - 0.5) * p.w,
-          y: p.y + p.h,
-          vx: (Math.random() - 0.5) * impactSpeed * 0.3,
-          vy: -Math.random() * 1.5,
-          life: 0.3 + Math.random() * 0.2,
-          maxLife: 0.5,
-          color: '#B8A88A',
-          size: 3 + Math.random() * 3,
-        });
-      }
+      // Landing dust particles (enhanced)
+      spawnLandingDust(state);
       // Hard landing freeze frame (only for big falls)
       if (impactSpeed > 8) {
         state.freezeTimer = 0.04; // 40ms hitstop
@@ -981,7 +1207,7 @@ function updatePhysics(state: GameState): void {
   player.x += player.vx;
   player.y += player.vy;
 
-  if (player.x < -580) player.x = -580; // left bound (street area)
+  if (player.x < -7250) player.x = -7250; // left bound (extended to plac zabaw)
   if (player.x + player.w > state.worldWidth) {
     player.x = state.worldWidth - player.w;
   }
@@ -1016,6 +1242,14 @@ function checkPlatformCollisions(state: GameState): void {
       }
     }
   }
+
+  // Trampoline bounce zone (garden, x:1100-1150)
+  if (player.onGround && player.x + player.w > 1100 && player.x < 1150 &&
+      player.y + player.h >= 548 && player.y + player.h <= 566) {
+    player.vy = -16; // super bounce!
+    player.onGround = false;
+    player.jumpCount = 1;
+  }
 }
 
 // ---- Wall collisions ----
@@ -1049,28 +1283,38 @@ function checkStairsProximity(state: GameState): void {
   const { player, stairs } = state;
 
   if (player.onStairs) {
-    const onAnyStair = stairs.some(s => {
-      const cx = player.x + player.w / 2;
-      return cx > s.x - 20 && cx < s.x + s.w + 20 &&
-        player.y + player.h >= s.topY && player.y <= s.bottomY;
-    });
-    if (!onAnyStair) { player.onStairs = false; player.jumpCount = 0; }
+    const px = player.x + player.w / 2;
 
+    // Find which stair the player is actually on (by x proximity)
+    let activeStair: typeof stairs[0] | null = null;
     for (const s of stairs) {
-      if (player.y + player.h < s.topY) {
-        player.y = s.topY - player.h;
-        player.vy = 0;
-        player.onStairs = false;
-        player.onGround = true;
-        player.jumpCount = 0;
+      if (px > s.x - 30 && px < s.x + s.w + 30 &&
+          player.y + player.h >= s.topY - 10 && player.y <= s.bottomY + 10) {
+        activeStair = s;
+        break;
       }
-      if (player.y + player.h > s.bottomY) {
-        player.y = s.bottomY - player.h;
-        player.vy = 0;
-        player.onStairs = false;
-        player.onGround = true;
-        player.jumpCount = 0;
-      }
+    }
+
+    if (!activeStair) {
+      player.onStairs = false;
+      player.jumpCount = 0;
+      return;
+    }
+
+    // Clamp only to the active stair
+    if (player.y + player.h < activeStair.topY) {
+      player.y = activeStair.topY - player.h;
+      player.vy = 0;
+      player.onStairs = false;
+      player.onGround = true;
+      player.jumpCount = 0;
+    }
+    if (player.y + player.h > activeStair.bottomY) {
+      player.y = activeStair.bottomY - player.h;
+      player.vy = 0;
+      player.onStairs = false;
+      player.onGround = true;
+      player.jumpCount = 0;
     }
   }
 }
@@ -1100,7 +1344,19 @@ function checkItemCollection(state: GameState): void {
       const isAnyPlush = item.type.startsWith('plush_');
       const isAnyBath = ['rubber_duck', 'shampoo'].includes(item.type);
       const isAnyBaby = ['baby_toy', 'baby_bottle', 'baby_blanket'].includes(item.type);
+      const isAnyBabyName = item.type === 'baby_name_card';
+      const isAnyHospital = item.type === 'hospital_item';
+      const isAnyBabyDecor = item.type === 'baby_decor';
+      const isAnyCraftSupply = item.type === 'craft_supply';
+      const isAnyBalloon = item.type === 'balloon';
       const isAnyRafal = ['pierogi', 'ptasie_mleczko'].includes(item.type);
+      const isAnyCoffee = ['coffee', 'milk', 'cookie'].includes(item.type);
+      const isAnyBreakfast = ['egg', 'milk', 'cream', 'flour'].includes(item.type);
+      const isAnyLunch = ['carrot', 'ingredient', 'bread'].includes(item.type);
+      const isAnyDinner = ['bread', 'cheese', 'salad', 'juice'].includes(item.type);
+      const isAnyZabka = ['chips', 'candy', 'water', 'ice_cream'].includes(item.type);
+      const isAnyMovieNight = ['popcorn'].includes(item.type);
+      const isAnyArtifact = item.type === 'artifact';
 
       if (step.itemType) {
         if (step.itemType !== item.type) {
@@ -1110,7 +1366,19 @@ function checkItemCollection(state: GameState): void {
             (item.questId === 'quest_jurek' && isAnyPlush) ||
             (item.questId === 'quest_bath' && isAnyBath) ||
             (item.questId === 'quest_baby' && isAnyBaby) ||
-            (item.questId === 'quest_rafal' && isAnyRafal);
+            (item.questId === 'quest_baby_name' && isAnyBabyName) ||
+            (item.questId === 'quest_hospital_bag' && isAnyHospital) ||
+            (item.questId === 'quest_baby_room' && isAnyBabyDecor) ||
+            (item.questId === 'quest_baby_gift' && isAnyCraftSupply) ||
+            (item.questId === 'quest_breathing' && isAnyBalloon) ||
+            (item.questId === 'quest_rafal' && isAnyRafal) ||
+            (item.questId === 'quest_coffee' && isAnyCoffee) ||
+            (item.questId === 'quest_breakfast' && isAnyBreakfast) ||
+            (item.questId === 'quest_lunch' && isAnyLunch) ||
+            (item.questId === 'quest_dinner' && isAnyDinner) ||
+            (item.questId === 'quest_zabka' && isAnyZabka) ||
+            (item.questId === 'quest_movie_night' && isAnyMovieNight) ||
+            isAnyArtifact;
           if (!questAllowsGroup) continue;
         }
       } else {
@@ -1121,7 +1389,19 @@ function checkItemCollection(state: GameState): void {
           (item.questId === 'quest_jurek' && isAnyPlush) ||
           (item.questId === 'quest_bath' && isAnyBath) ||
           (item.questId === 'quest_baby' && isAnyBaby) ||
-          (item.questId === 'quest_rafal' && isAnyRafal);
+          (item.questId === 'quest_baby_name' && isAnyBabyName) ||
+          (item.questId === 'quest_hospital_bag' && isAnyHospital) ||
+          (item.questId === 'quest_baby_room' && isAnyBabyDecor) ||
+          (item.questId === 'quest_baby_gift' && isAnyCraftSupply) ||
+          (item.questId === 'quest_breathing' && isAnyBalloon) ||
+          (item.questId === 'quest_rafal' && isAnyRafal) ||
+          (item.questId === 'quest_coffee' && isAnyCoffee) ||
+          (item.questId === 'quest_breakfast' && isAnyBreakfast) ||
+          (item.questId === 'quest_lunch' && isAnyLunch) ||
+          (item.questId === 'quest_dinner' && isAnyDinner) ||
+          (item.questId === 'quest_zabka' && isAnyZabka) ||
+          (item.questId === 'quest_movie_night' && isAnyMovieNight) ||
+          isAnyArtifact;
         if (!isMatchingGroup) continue;
       }
 
@@ -1146,6 +1426,23 @@ function checkItemCollection(state: GameState): void {
       state.freezeTimer = 0.025; // 25ms hitstop — subtle but impactful
       triggerScreenShake(state, 2, 0.1);
 
+      // Sparkle particles on item collect
+      for (let si = 0; si < 6; si++) {
+        state.particles.push({
+          x: item.x + item.w / 2,
+          y: item.y + item.h / 2,
+          vx: (Math.random() - 0.5) * 4,
+          vy: (Math.random() - 0.5) * 4 - 2,
+          life: 0.6 + Math.random() * 0.3,
+          maxLife: 0.9,
+          color: '#FFD700',
+          size: 4 + Math.random() * 3,
+          type: 'sparkle',
+        });
+      }
+      // Happy emotion
+      setPlayerEmotion(state, 'happy', 1.5);
+
       // Collect particles
       spawnCollectParticles(state, item.x + item.w / 2, item.y + item.h / 2, item.type);
 
@@ -1154,7 +1451,16 @@ function checkItemCollection(state: GameState): void {
       spawnFloatingText(state, item.x, item.y, `${emoji} +10`, '#FFD700', 18);
 
       // Count message
-      showMessage(state, `${emoji} ${step.currentCount}/${step.targetCount}`, 1.5);
+      const remaining = step.targetCount! - step.currentCount!;
+      if (remaining <= 0) {
+        showMessage(state, `${emoji} Wszystko zebrane! ✅`, 1.5);
+      } else if (remaining === 1) {
+        showMessage(state, `${emoji} Jeszcze tylko 1! 🔥`, 1.5);
+      } else if (remaining === 2) {
+        showMessage(state, `${emoji} Jeszcze ${remaining}! Prawie! 💪`, 1.5);
+      } else {
+        showMessage(state, `${emoji} ${step.currentCount}/${step.targetCount}`, 1.5);
+      }
 
       // Check achievement
       if (state.totalItemsCollected >= 20) {
@@ -1175,11 +1481,22 @@ function checkItemCollection(state: GameState): void {
   }
 }
 
-// ---- Update items (floating) ----
-function updateItems(state: GameState): void {
+// ---- Update items (floating + fade-in for active quest) ----
+function updateItems(state: GameState, dt: number): void {
+  const activeQuest = state.quests.find(q => q.active && !q.completed);
+  const activeQuestId = activeQuest?.id;
+  const activeStep = activeQuest?.steps[activeQuest.currentStep];
+  const isCollectPhase = activeStep?.type === 'collect';
+
   for (const item of state.items) {
     if (!item.collected) {
       item.floatPhase += ITEM_FLOAT_SPEED;
+      // Fade-in items that belong to active quest's collect step
+      if (item.questId === activeQuestId && isCollectPhase) {
+        item.fadeIn = Math.min(1, (item.fadeIn ?? 0) + dt * 2.5); // 0.4s fade
+      } else {
+        item.fadeIn = Math.max(0, (item.fadeIn ?? 0) - dt * 3); // fast fade-out
+      }
     }
   }
 }
@@ -1255,11 +1572,14 @@ function updateCamera(state: GameState): void {
   const viewW = CANVAS_W / camera.zoom;
   const viewH = CANVAS_H / camera.zoom;
 
-  camera.targetX = player.x + player.w / 2 - viewW / 2;
-  camera.targetY = player.y + player.h / 2 - viewH / 2;
+  // Camera look-ahead: offset in movement direction for better visibility
+  const lookAheadX = player.vx * 18;  // look ~18 frames ahead
+  const lookAheadY = player.vy > 2 ? player.vy * 6 : 0; // look down when falling
+  camera.targetX = player.x + player.w / 2 - viewW / 2 + lookAheadX;
+  camera.targetY = player.y + player.h / 2 - viewH / 2 + lookAheadY;
 
-  // Clamp to world bounds (street extends to x=-600)
-  const minX = -600;
+  // Clamp to world bounds (map extends left to plac zabaw, right to osiedle)
+  const minX = -7400;
   if (camera.targetX < minX) camera.targetX = minX;
   if (camera.targetX > state.worldWidth - viewW) camera.targetX = state.worldWidth - viewW;
   if (camera.targetY < 0) camera.targetY = 0;
@@ -1567,6 +1887,114 @@ export function toggleRCControl(state: GameState): void {
   }
 }
 
+// ---- Vehicle mount/dismount ----
+export function toggleVehicle(state: GameState): void {
+  if (state.phase !== 'playing') return;
+
+  // If already on a vehicle — dismount
+  if (state.activeVehicle) {
+    dismountVehicle(state);
+    return;
+  }
+
+  // Find nearest parked vehicle within 60px
+  const px = state.player.x + state.player.w / 2;
+  const py = state.player.y + state.player.h;
+  let nearest: Vehicle | null = null;
+  let nearestDist = 80;
+  for (const v of state.vehicles) {
+    if (v.active) continue;
+    const dx = Math.abs(v.x - px);
+    const dy = Math.abs(v.y - py);
+    const dist = dx + dy;
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearest = v;
+    }
+  }
+  if (nearest) {
+    mountVehicle(state, nearest);
+  }
+}
+
+function mountVehicle(state: GameState, vehicle: Vehicle): void {
+  vehicle.active = true;
+  state.activeVehicle = vehicle;
+  vehicle.dir = state.player.dir;
+  vehicle.vx = 0;
+  vehicle.trickState = 'none';
+  vehicle.trickTimer = 0;
+  vehicle.trickScore = 0;
+  vehicle.comboCount = 0;
+  vehicle.comboTimer = 0;
+  vehicle.wheelieAngle = 0;
+  vehicle.airRotation = 0;
+  const def = VEHICLE_DEFS[vehicle.type];
+  showMessage(state, `🚲 ${def.label}! B = zsiądź`, 2);
+  spawnParticles(state, state.player.x + state.player.w / 2, state.player.y + state.player.h, 6, '#FFD700');
+}
+
+function dismountVehicle(state: GameState): void {
+  if (!state.activeVehicle) return;
+  const v = state.activeVehicle;
+  v.active = false;
+  v.x = state.player.x;
+  v.y = state.player.y + state.player.h - 10;
+  v.vx = 0;
+  v.trickState = 'none';
+  v.wheelieAngle = 0;
+  v.airRotation = 0;
+  state.activeVehicle = null;
+  showMessage(state, '🚶 Kuba zszedł z pojazdu', 1.5);
+}
+
+// Update vehicle trick timers & scoring
+function updateVehicleTricks(state: GameState, dt: number): void {
+  const v = state.activeVehicle;
+  if (!v) return;
+
+  // Trick timer
+  if (v.trickState !== 'none') {
+    v.trickTimer += dt;
+    // Continuous tricks (wheelie, manual) score per second
+    if (v.trickState === 'wheelie' || v.trickState === 'manual') {
+      v.trickScore += (TRICK_SCORES[v.trickState] || 5) * dt;
+      if (v.trickState === 'wheelie') {
+        v.wheelieAngle = Math.min(45, v.wheelieAngle + 60 * dt);
+      }
+    }
+  }
+
+  // Combo timer
+  if (v.comboTimer > 0) {
+    v.comboTimer -= dt;
+    if (v.comboTimer <= 0) {
+      // Combo ended — give score
+      if (v.comboCount > 1) {
+        const totalScore = Math.floor(v.trickScore * v.comboCount);
+        state.score += totalScore;
+        spawnFloatingText(state, state.player.x + state.player.w / 2, state.player.y - 30,
+          `${v.comboCount}x COMBO! +${totalScore}`, '#FFD700', 24);
+      }
+      v.comboCount = 0;
+      v.trickScore = 0;
+    }
+  }
+
+  // Auto-dismount when entering buildings
+  if (v.active) {
+    const px = state.player.x + state.player.w / 2;
+    for (const room of state.rooms) {
+      if (px >= room.x && px <= room.x + room.w &&
+          state.player.y + state.player.h > room.y &&
+          state.player.y < room.y + room.h) {
+        dismountVehicle(state);
+        break;
+      }
+    }
+  }
+}
+
 // ---- Street traffic (cars driving on street, left of house) ----
 function updateStreetTraffic(state: GameState, dt: number): void {
   // Spawn cars
@@ -1648,22 +2076,18 @@ export function spawnCollectParticles(state: GameState, x: number, y: number, ty
     });
   }
 
-  // Extra sparkle burst (stars going up)
-  const starEmojis = ['✨', '⭐', '💫'];
-  for (let i = 0; i < 5; i++) {
+  // Extra upward sparkles (no star emojis — just colored dots)
+  for (let i = 0; i < 4; i++) {
     state.particles.push({
       x: x + (Math.random() - 0.5) * 20,
       y: y - 5,
-      vx: (Math.random() - 0.5) * 4,
-      vy: -(Math.random() * 5 + 3),
-      life: 0.8 + Math.random() * 0.5,
-      maxLife: 1.3,
-      color: '#FFD700',
-      size: 8 + Math.random() * 6,
-      emoji: starEmojis[Math.floor(Math.random() * starEmojis.length)],
+      vx: (Math.random() - 0.5) * 3,
+      vy: -(Math.random() * 4 + 2),
+      life: 0.6 + Math.random() * 0.3,
+      maxLife: 0.9,
+      color,
+      size: 5 + Math.random() * 4,
       type: 'sparkle',
-      rotation: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.2,
     });
   }
 
@@ -1684,7 +2108,7 @@ export function spawnCollectParticles(state: GameState, x: number, y: number, ty
 }
 
 export function spawnCelebrationParticles(state: GameState, x: number, y: number): void {
-  const emojis = ['⭐', '🎉', '✨', '🌟', '💫', '🎊', '🏆'];
+  const emojis = ['🎉', '✨', '🎊', '🏆', '👏', '💪'];
   const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#DDA0DD'];
 
   for (let i = 0; i < 40; i++) {
@@ -1846,6 +2270,32 @@ export function setWeather(state: GameState, weather: 'sunny' | 'cloudy' | 'rain
   state.weatherParticles = [];
 }
 
+// ---- Season control ----
+export function setSeason(state: GameState, season: 'wiosna' | 'lato' | 'jesien' | 'zima'): void {
+  state.season = season;
+  // Auto-set default weather for season
+  const seasonWeather: Record<string, 'sunny' | 'cloudy' | 'rainy' | 'snowy' | 'leaves'> = {
+    wiosna: 'rainy',
+    lato: 'sunny',
+    jesien: 'leaves',
+    zima: 'snowy',
+  };
+  setWeather(state, seasonWeather[season]);
+  // Show/hide season-specific items
+  for (const item of state.items) {
+    if (item.id.startsWith('season_')) {
+      const itemSeason = item.id.split('_')[1]; // season_wiosna_xxx
+      item.collected = itemSeason !== season; // hide items from other seasons
+    }
+  }
+  // Show/hide season quests
+  for (const quest of state.quests) {
+    if (quest.season && quest.season !== season && !quest.completed) {
+      quest.active = false;
+    }
+  }
+}
+
 // ---- Messages ----
 function showMessage(state: GameState, text: string, duration: number): void {
   state.message = { text, timer: duration, icon: '' };
@@ -1888,6 +2338,154 @@ export function clearSave(): void {
   try { localStorage.removeItem('migdalowa_save'); } catch { /* ok */ }
 }
 
+// ---- Bike Race System ----
+export function startBikeRace(state: GameState, raceId: string): boolean {
+  const raceDef = BIKE_RACES.find(r => r.id === raceId);
+  if (!raceDef) return false;
+  if (!state.activeVehicle) return false;
+  if (!raceDef.requiredVehicle.includes(state.activeVehicle.type)) {
+    showMessage(state, `Potrzebujesz: ${raceDef.requiredVehicle.join(' / ')}`, 3);
+    return false;
+  }
+  if (state.bikeRace) return false;
+
+  // Position player at start
+  state.player.x = raceDef.startX;
+
+  state.bikeRace = {
+    type: raceDef.type as RaceType,
+    name: raceDef.name,
+    startX: raceDef.startX,
+    endX: raceDef.endX,
+    opponentId: raceDef.opponentId,
+    opponentX: raceDef.startX,
+    opponentSpeed: raceDef.opponentSpeed,
+    opponentDir: raceDef.endX > raceDef.startX ? 1 : -1,
+    timer: 0,
+    timeLimit: raceDef.timeLimit,
+    countdown: 3,
+    finished: false,
+    won: false,
+    bestTime: Infinity,
+    trickTarget: raceDef.trickTarget,
+    tricksCurrent: 0,
+    arcadeOverlay: true,
+    checkpoints: [...raceDef.checkpoints],
+    checkpointsPassed: 0,
+  };
+
+  showMessage(state, `🏁 ${raceDef.name} — PRZYGOTUJ SIĘ!`, 2);
+  return true;
+}
+
+function updateBikeRace(state: GameState, dt: number): void {
+  const race = state.bikeRace;
+  if (!race) return;
+
+  // Countdown phase
+  if (race.countdown > 0) {
+    race.countdown -= dt;
+    if (race.countdown <= 0) {
+      race.countdown = 0;
+      showMessage(state, '🏁 START!', 1);
+    }
+    return;
+  }
+
+  if (race.finished) return;
+
+  // Update race timer
+  race.timer += dt;
+
+  // Move opponent (for sprint races)
+  if (race.opponentId && race.opponentSpeed > 0) {
+    const dir = race.endX > race.startX ? 1 : -1;
+    race.opponentX += race.opponentSpeed * dir * dt * 60;
+    race.opponentDir = dir;
+
+    // Check if opponent finished
+    if ((dir > 0 && race.opponentX >= race.endX) || (dir < 0 && race.opponentX <= race.endX)) {
+      race.finished = true;
+      race.won = false;
+      showMessage(state, '😞 Przegrałeś! Spróbuj ponownie!', 3);
+      setTimeout(() => { state.bikeRace = null; }, 3000);
+      return;
+    }
+  }
+
+  // Track trick score for trick challenges
+  if (race.type === 'trickChallenge' && state.activeVehicle) {
+    race.tricksCurrent = state.activeVehicle.trickScore;
+    if (race.tricksCurrent >= race.trickTarget) {
+      race.finished = true;
+      race.won = true;
+      showMessage(state, `🏆 BRAWO! Zdobyłeś ${race.tricksCurrent} pkt!`, 3);
+      spawnRaceReward(state);
+      setTimeout(() => { state.bikeRace = null; }, 3000);
+      return;
+    }
+  }
+
+  // Time limit check
+  if (race.timeLimit > 0 && race.timer >= race.timeLimit) {
+    race.finished = true;
+    race.won = race.type === 'trickChallenge' ? race.tricksCurrent >= race.trickTarget : false;
+    showMessage(state, race.won ? '🏆 BRAWO! Zdążyłeś!' : '⏰ Czas minął!', 3);
+    if (race.won) spawnRaceReward(state);
+    setTimeout(() => { state.bikeRace = null; }, 3000);
+    return;
+  }
+
+  // Check checkpoints
+  const px = state.player.x + state.player.w / 2;
+  const dir = race.endX > race.startX ? 1 : -1;
+  if (race.checkpointsPassed < race.checkpoints.length) {
+    const nextCP = race.checkpoints[race.checkpointsPassed];
+    if ((dir > 0 && px >= nextCP) || (dir < 0 && px <= nextCP)) {
+      race.checkpointsPassed++;
+      addFloatingText(state, state.player.x, state.player.y - 40,
+        `✅ CP ${race.checkpointsPassed}/${race.checkpoints.length}`, '#4CAF50');
+    }
+  }
+
+  // Check if player crossed finish line
+  if ((dir > 0 && px >= race.endX) || (dir < 0 && px <= race.endX)) {
+    race.finished = true;
+    race.won = true;
+    const timeStr = race.timer.toFixed(1);
+    showMessage(state, `🏆 WYGRAŁEŚ! Czas: ${timeStr}s`, 4);
+    if (race.timer < race.bestTime) race.bestTime = race.timer;
+    spawnRaceReward(state);
+    setTimeout(() => { state.bikeRace = null; }, 4000);
+  }
+}
+
+function spawnRaceReward(state: GameState): void {
+  state.score += 100;
+  state.stars += 1;
+  addFloatingText(state, state.player.x, state.player.y - 60, '+100 ⭐ +1', '#FFD700');
+  // Particles celebration
+  for (let i = 0; i < 20; i++) {
+    state.particles.push({
+      x: state.player.x + state.player.w / 2,
+      y: state.player.y,
+      vx: (Math.random() - 0.5) * 8,
+      vy: -Math.random() * 6 - 2,
+      life: 1,
+      maxLife: 1,
+      color: ['#FFD700', '#FF5722', '#4CAF50', '#2196F3'][Math.floor(Math.random() * 4)],
+      size: 3 + Math.random() * 4,
+      type: 'confetti',
+    });
+  }
+}
+
+function addFloatingText(state: GameState, x: number, y: number, text: string, color: string): void {
+  state.floatingTexts.push({
+    x, y, text, color, life: 2, maxLife: 2, vy: -1.5, size: 16,
+  });
+}
+
 // ---- Activate next quest ----
 function activateNextQuest(state: GameState): void {
   const next = state.quests.find(q => !q.active && !q.completed);
@@ -1924,6 +2522,42 @@ function activateNextQuest(state: GameState): void {
   }
 }
 
+// ---- Quest selection: activate a specific quest by ID ----
+export function selectQuest(state: GameState, questId: string): void {
+  // Deactivate current non-completed active quest
+  const current = state.quests.find(q => q.active && !q.completed);
+  if (current) {
+    current.active = false;
+    // Reset current quest progress
+    current.currentStep = 0;
+    current.steps.forEach(s => {
+      s.completed = false;
+      if ('currentCount' in s) (s as { currentCount: number }).currentCount = 0;
+    });
+    // Uncollect items for this quest
+    state.items.filter(i => i.questId === current.id && i.collected).forEach(i => { i.collected = false; });
+  }
+
+  // Activate selected quest
+  const quest = state.quests.find(q => q.id === questId);
+  if (quest && !quest.completed) {
+    quest.active = true;
+    quest.currentStep = 0;
+    quest.steps.forEach(s => {
+      s.completed = false;
+      if ('currentCount' in s) (s as { currentCount: number }).currentCount = 0;
+    });
+    const npc = state.npcs.find(n => n.id === quest.npcId);
+    if (npc) {
+      npc.emote = '❗';
+      if (!npc.visible) { npc.visible = true; npc.animTimer = 0; }
+    }
+    showQuestNPCs(state, quest.id);
+    showMessage(state, `📋 Misja: ${quest.title}`, 3);
+  }
+  state.phase = 'playing';
+}
+
 // ---- Dialog advancement ----
 export function advanceDialog(state: GameState): void {
   if (!state.dialog) return;
@@ -1956,6 +2590,172 @@ function getNpcIcon(npcId: string): string {
   const icons: Record<string, string> = {
     mama: '👩', tata: '👨', kot: '🐱', listonosz: '📮', jurek_npc: '🐕',
     wujek: '🚗', budowlaniec: '🏗️', sasiadka: '🌻', franek: '🐾',
+    zabka_clerk: '🐸', mirek: '🩺', policjant: '👮', rafal: '🎒',
   };
   return icons[npcId] || '💬';
+}
+
+// ============================
+// NEW SYSTEMS (10 improvements)
+// ============================
+
+// ---- 1. Parallax cloud movement ----
+function updateParallaxClouds(state: GameState, _dt: number): void {
+  for (const cloud of state.parallaxClouds) {
+    cloud.x += cloud.speed;
+    // Wrap around when off-screen
+    if (cloud.x > state.camera.x + CANVAS_W / state.camera.zoom + 200) {
+      cloud.x = state.camera.x - 300 - cloud.w;
+    }
+    if (cloud.x + cloud.w < state.camera.x - 300) {
+      cloud.x = state.camera.x + CANVAS_W / state.camera.zoom + 200;
+    }
+  }
+}
+
+// ---- 2. Day/night cycle (slow, ~5 min per full day) ----
+function updateDayNightCycle(state: GameState, dt: number): void {
+  state.dayTime = (state.dayTime + dt * 0.0016) % 1; // full cycle in ~625s (~10min)
+}
+
+// ---- 3. NPC idle animations ----
+function updateNPCIdle(state: GameState, dt: number): void {
+  for (const npc of state.npcs) {
+    if (!npc.visible) continue;
+    npc.idlePhase = (npc.idlePhase || 0) + dt * 1.5;
+    npc.blinkTimer = (npc.blinkTimer || 3) - dt;
+    if (npc.blinkTimer <= 0) {
+      npc.blinkTimer = 3 + Math.random() * 5; // reset blink
+    }
+  }
+}
+
+// ---- 4. Dust/landing particles (triggered from physics) ----
+function spawnLandingDust(state: GameState): void {
+  const { player } = state;
+  const impact = Math.abs(player.prevVy);
+  if (impact < 4) return;
+  const count = Math.min(8, Math.floor(impact * 0.8));
+  for (let i = 0; i < count; i++) {
+    state.particles.push({
+      x: player.x + player.w / 2 + (Math.random() - 0.5) * player.w,
+      y: player.y + player.h,
+      vx: (Math.random() - 0.5) * impact * 0.5,
+      vy: -Math.random() * 2,
+      life: 0.5 + Math.random() * 0.3,
+      maxLife: 0.8,
+      color: '#C8AD8A',
+      size: 3 + Math.random() * 3,
+      type: 'sparkle',
+    });
+  }
+}
+
+// ---- 8. Franek companion AI ----
+function updateCompanionFranek(state: GameState, dt: number): void {
+  const comp = state.companionFranek;
+  if (!comp) {
+    // Activate Franek companion after 3 quests completed
+    if (state.questsCompleted >= 3) {
+      spawnCompanion(state);
+    }
+    return;
+  }
+
+  // Record player position for delayed following
+  comp.posHistory.push({ x: state.player.x, y: state.player.y });
+  if (comp.posHistory.length > 30) comp.posHistory.shift(); // ~0.5s delay at 60fps
+
+  // Follow delayed position
+  const target = comp.posHistory[0] || { x: state.player.x, y: state.player.y };
+  const dx = target.x - comp.x;
+  const distX = Math.abs(dx);
+
+  // Move toward player if far enough
+  if (distX > 80) {
+    comp.vx += (dx > 0 ? 2.2 : -2.2) * dt * 60;
+    comp.dir = dx > 0 ? 1 : -1;
+  } else if (distX < 30) {
+    comp.vx *= 0.9; // slow down when close
+  }
+  comp.vx *= 0.92; // friction
+  comp.x += comp.vx * dt * 60 * 0.016;
+
+  // Gravity
+  comp.vy += GRAVITY * 0.5;
+  comp.y += comp.vy;
+
+  // Ground collision
+  for (const plat of state.platforms) {
+    if (comp.x + 24 > plat.x && comp.x < plat.x + plat.w &&
+        comp.y + 42 > plat.y && comp.y + 42 < plat.y + plat.h + 10 && comp.vy >= 0) {
+      comp.y = plat.y - 42;
+      comp.vy = 0;
+      comp.onGround = true;
+    }
+  }
+
+  // Jump if player is higher
+  if (comp.onGround && target.y < comp.y - 60) {
+    comp.vy = JUMP_FORCE * 0.8;
+    comp.onGround = false;
+  }
+
+  // Tail wag
+  comp.tailWag += dt * (distX < 60 ? 8 : 4);
+
+  // Emotion based on context
+  const nearKot = state.npcs.find(n => n.id === 'kot' && n.visible && Math.abs(n.x - comp.x) < 100);
+  if (nearKot) {
+    comp.emotion = 'alert';
+  } else if (Math.abs(comp.vx) > 1.5) {
+    comp.emotion = 'excited';
+  } else {
+    comp.emotion = 'happy';
+  }
+}
+
+// ---- 9. Screen transition ----
+function updateScreenTransition(state: GameState, dt: number): void {
+  const t = state.screenTransition;
+  if (!t.active) return;
+  t.progress += dt * 3;
+  if (t.progress >= 1) {
+    t.active = false;
+    t.progress = 0;
+  }
+}
+
+// ---- 10. Player emotion ----
+function updatePlayerEmotion(state: GameState, dt: number): void {
+  const { player } = state;
+  if (player.emotionTimer > 0) {
+    player.emotionTimer -= dt;
+    if (player.emotionTimer <= 0) {
+      player.emotion = 'neutral';
+    }
+  }
+
+  // Auto-set emotions based on context
+  if (player.emotionTimer <= 0) {
+    // Running fast = excited
+    if (Math.abs(player.vx) > 2.5 && player.walking) {
+      player.emotion = 'excited';
+    }
+    // Near NPC with emote = surprised
+    else if (state.npcs.some(n => n.visible && n.emote === '❗' &&
+      Math.abs(n.x - player.x) < 80 && Math.abs(n.y - player.y) < 80)) {
+      player.emotion = 'surprised';
+    }
+    // Default
+    else {
+      player.emotion = 'neutral';
+    }
+  }
+}
+
+// Trigger emotion from external events (called from collection, quest completion etc.)
+function setPlayerEmotion(state: GameState, emotion: Player['emotion'], duration: number): void {
+  state.player.emotion = emotion;
+  state.player.emotionTimer = duration;
 }
